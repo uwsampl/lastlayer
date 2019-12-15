@@ -20,7 +20,20 @@ fn get_verilator(path: &Path) {
     }
 }
 
+fn set_verilator_version(path: &Path, ver: &str) {
+    if path.exists() {
+        let mut cmd = Command::new("git");
+        cmd.arg("-C")
+            .arg(path)
+            .arg("checkout")
+            .arg(&format!("v{}", ver));
+        run_cmd(&mut cmd);
+    }
+}
+
 fn main() {
-    let verilator_path = PathBuf::from("verilator");
-    get_verilator(&verilator_path);
+    let version = "4.024";
+    let build_path = PathBuf::from("verilator");
+    get_verilator(&build_path);
+    set_verilator_version(&build_path, version);
 }
