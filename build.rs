@@ -66,6 +66,18 @@ mod verilator {
             let mut cmd = Command::new("./configure");
             cmd.arg("--prefix").arg(&self.build_path);
             run_cmd(&mut cmd);
+            self.change_to_root_dir();
+        }
+
+        fn make(&self, jobs: u32) {
+            self.change_to_verilator_dir();
+            let mut cmd = Command::new("make");
+            if jobs > 0 {
+                cmd.arg("-j")
+                    .arg(&format!("{}", jobs));
+            }
+            run_cmd(&mut cmd);
+            self.change_to_root_dir();
         }
 
         pub fn new(version: &str, root_path: &Path, verilator_path: &Path) -> Build {
@@ -77,18 +89,20 @@ mod verilator {
             }
         }
 
-        pub fn compile(&self) {
+        pub fn compile(&self, jobs: u32) {
             self.download();
             self.autoconf();
             self.configure();
+            self.make(jobs);
         }
     }
 }
 
 fn main() {
+    let jobs: u32 = 8;
     let version = "4.024";
     let root_path = current_dir().unwrap();
     let verilator_path = root_path.join("verilator");
     let verilator = verilator::Build::new(&version, &root_path, &verilator_path);
-    verilator.compile();
+    verilator.compile(jobs);
 }
