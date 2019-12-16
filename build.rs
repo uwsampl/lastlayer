@@ -80,6 +80,14 @@ mod verilator {
             self.change_to_root_dir();
         }
 
+        fn install(&self) {
+            self.change_to_verilator_dir();
+            let mut cmd = Command::new("make");
+            cmd.arg("install");
+            run_cmd(&mut cmd);
+            self.change_to_root_dir();
+        }
+
         pub fn new(version: &str, root_path: &Path, verilator_path: &Path) -> Build {
             Build {
                 version: version.to_string(),
@@ -94,12 +102,13 @@ mod verilator {
             self.autoconf();
             self.configure();
             self.make(jobs);
+            self.install();
         }
     }
 }
 
 fn main() {
-    let jobs: u32 = 8;
+    let jobs: u32 = 1;
     let version = "4.024";
     let root_path = current_dir().unwrap();
     let verilator_path = root_path.join("verilator");
