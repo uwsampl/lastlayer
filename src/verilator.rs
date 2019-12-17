@@ -126,6 +126,7 @@ impl Build {
     }
 
     pub fn out_dir<P: AsRef<Path>>(&mut self, out: P) -> &mut Build {
+        assert!(out.as_ref().is_dir(), "out_dir does not seems to be a directory");
         self.out_dir = Some(out.as_ref().to_path_buf());
         self
     }
@@ -208,20 +209,6 @@ impl Build {
 //         Ok(())
 //     }
 
-//     fn get_out_path(&self) -> PathBuf {
-//         match self.out.clone() {
-//             Some(p) => p,
-//             None => panic!("Out dir not set"),
-//         }
-//     }
-
-//     fn get_top(&self) -> String {
-//         match self.top.clone() {
-//             Some(p) => p,
-//             None => panic!("Top module name not set"),
-//         }
-//     }
-
 //     fn get_include_path(&self) -> PathBuf {
 //         let mut p: Option<PathBuf> = None;
 //         for path in self.inclue_paths.iter() {
@@ -236,25 +223,6 @@ impl Build {
 //         }
 //     }
 
-//     fn compile_verilog(&self) {
-//         let mut cmd = Command::new("verilator");
-
-//         cmd.arg("--cc")
-//             .arg("-Mdir")
-//             .arg(self.get_out_path())
-//             .arg("--top-module")
-//             .arg(self.get_top());
-
-//         for warn in &self.warnings {
-//             cmd.arg(format!("-Wno-{}", warn));
-//         }
-
-//         for file in self.verilog_files.iter() {
-//             cmd.arg(file);
-//         }
-
-//         run_cmd(&mut cmd);
-//     }
 
 //     fn compile_cc(&mut self) {
 //         let include_path = self.get_include_path();
