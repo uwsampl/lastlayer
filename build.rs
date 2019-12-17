@@ -16,102 +16,178 @@ mod verilator {
 
     use super::*;
 
+    #[derive(Clone, Debug)]
     pub struct Build {
-        pub version: String,
-        pub root_path: PathBuf,
-        pub verilator_path: PathBuf,
-        pub build_path: PathBuf,
+        pub version: Option<String>,
+        pub jobs: Option<u32>,
+        pub root_dir: Option<PathBuf>,
+        pub verilator_dir: Option<PathBuf>,
+        pub build_dir: Option<PathBuf>,
     }
 
     impl Build {
-        fn set_version(&self) {
+
+        fn get_root_dir(&self) -> PathBuf {
+            match &self.root_dir {
+                Some(d) => d.to_path_buf(),
+                None => panic!("root dir not defined"),
+            }
+        }
+
+        fn get_verilator_dir(&self) -> PathBuf {
+            match &self.verilator_dir {
+                Some(d) => d.to_path_buf(),
+                None => panic!("verilator dir not defined"),
+            }
+        }
+
+        fn get_build_dir(&self) -> PathBuf {
+            match &self.build_dir {
+                Some(d) => d.to_path_buf(),
+                None => panic!("build dir not defined"),
+            }
+        }
+
+        fn get_version(&self) -> String {
+            match &self.version {
+                Some(s) => s.to_string(),
+                None => panic!("version not defined"),
+            }
+        }
+
+        fn get_jobs(&self) -> u32 {
+            match &self.jobs {
+                Some(n) => *n,
+                None => panic!("jobs not defined"),
+            }
+        }
+
+        fn get_verilator_bin(&self) -> PathBuf {
+            self.get_build_dir().join("bin/verilator")
+        }
+
+        fn set_branch(&self) {
             let mut cmd = Command::new("git");
             cmd.arg("-C")
-                .arg(&self.verilator_path)
+                .arg(self.get_verilator_dir())
                 .arg("checkout")
-                .arg(&format!("v{}", self.version))
+                .arg(&format!("v{}", self.get_version()))
                 .arg("-b")
-                .arg(&format!("build_v{}", self.version));
+                .arg(&format!("build_v{}", self.get_version()));
             run_cmd(&mut cmd);
         }
 
         fn download(&self) {
-            if !self.verilator_path.exists() {
+            if !self.get_verilator_dir().exists() {
                 let mut cmd = Command::new("git");
                 cmd.arg("clone")
                     .arg("https://git.veripool.org/git/verilator");
                 run_cmd(&mut cmd);
-                self.set_version();
+                self.set_branch();
             }
-            assert!(self.verilator_path.exists());
+            assert!(self.get_verilator_dir().exists());
         }
 
-        fn change_to_verilator_dir(&self) {
-            set_current_dir(&self.verilator_path).expect("failed to change dir");
+        fn cd_to_verilator_dir(&self) {
+            set_current_dir(self.get_verilator_dir()).expect("failed to change dir");
+            println!("cd to {:?}", current_dir().unwrap());
         }
 
-        fn change_to_root_dir(&self) {
-            set_current_dir(&self.root_path).expect("failed to change dir");
+        fn cd_to_root_dir(&self) {
+            set_current_dir(self.get_root_dir()).expect("failed to change dir");
+            println!("cd to {:?}", current_dir().unwrap());
         }
 
         fn autoconf(&self) {
-            self.change_to_verilator_dir();
+            self.cd_to_verilator_dir();
             let mut cmd = Command::new("autoconf");
             run_cmd(&mut cmd);
-            self.change_to_root_dir();
+            self.cd_to_root_dir();
         }
 
         fn configure(&self) {
-            self.change_to_verilator_dir();
+            self.cd_to_verilator_dir();
             let mut cmd = Command::new("./configure");
-            cmd.arg("--prefix").arg(&self.build_path);
+            cmd.arg("--prefix").arg(self.get_build_dir());
             run_cmd(&mut cmd);
-            self.change_to_root_dir();
+            self.cd_to_root_dir();
         }
 
-        fn make(&self, jobs: u32) {
-            self.change_to_verilator_dir();
+        fn make(&self) {
+            self.cd_to_verilator_dir();
             let mut cmd = Command::new("make");
-            if jobs > 0 {
+            if self.get_jobs() > 0 {
                 cmd.arg("-j")
-                    .arg(&format!("{}", jobs));
+                    .arg(&format!("{}", self.get_jobs()));
             }
             run_cmd(&mut cmd);
-            self.change_to_root_dir();
+            self.cd_to_root_dir();
         }
 
         fn install(&self) {
-            self.change_to_verilator_dir();
+            self.cd_to_verilator_dir();
             let mut cmd = Command::new("make");
             cmd.arg("install");
             run_cmd(&mut cmd);
-            self.change_to_root_dir();
+            self.cd_to_root_dir();
         }
 
-        pub fn new(version: &str, root_path: &Path, verilator_path: &Path) -> Build {
+        pub fn new() -> Build {
             Build {
-                version: version.to_string(),
-                root_path: root_path.to_path_buf(),
-                verilator_path: verilator_path.to_path_buf(),
-                build_path: verilator_path.join("build"),
+                version: None,
+                jobs: None,
+                root_dir: None,
+                verilator_dir: None,
+                build_dir: None,
             }
         }
 
-        pub fn compile(&self, jobs: u32) {
-            self.download();
-            self.autoconf();
-            self.configure();
-            self.make(jobs);
-            self.install();
+        pub fn version(&mut self, ver: &str) -> &mut Build {
+            self.version = Some(ver.to_string());
+            self
+        }
+
+        pub fn jobs(&mut self, n: u32) -> &mut Build {
+            self.jobs = Some(n);
+            self
+        }
+
+        pub fn root_dir<P: AsRef<Path>>(&mut self, dir: P) -> &mut Build {
+            self.root_dir = Some(dir.as_ref().to_owned());
+            self
+        }
+
+        pub fn verilator_dir<P: AsRef<Path>>(&mut self, dir: P) -> &mut Build {
+            self.verilator_dir = Some(dir.as_ref().to_owned());
+            self
+        }
+
+        pub fn build_dir<P: AsRef<Path>>(&mut self, dir: P) -> &mut Build {
+            self.build_dir = Some(dir.as_ref().to_owned());
+            self
+        }
+
+        pub fn compile(&self) {
+            if !self.get_verilator_bin().exists() {
+                self.download();
+                self.autoconf();
+                self.configure();
+                self.make();
+                self.install();
+            }
         }
     }
 }
 
 fn main() {
-    let jobs: u32 = 1;
-    let version = "4.024";
-    let root_path = current_dir().unwrap();
-    let verilator_path = root_path.join("verilator");
-    let verilator = verilator::Build::new(&version, &root_path, &verilator_path);
-    verilator.compile(jobs);
+    let root_dir = current_dir().unwrap();
+    let verilator_dir = root_dir.join("verilator");
+    let build_dir = verilator_dir.join("build");
+    verilator::Build::new()
+        .version(&"4.024")
+        .jobs(1)
+        .root_dir(&root_dir)
+        .verilator_dir(&verilator_dir)
+        .build_dir(&build_dir)
+        .compile();
 }
