@@ -1,17 +1,18 @@
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-pub fn get_manifest_dir_path() -> PathBuf {
+pub fn get_manifest_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
 }
 
-pub fn create_date_dir(name: &str) -> PathBuf {
+pub fn create_date_dir(path: &Path, name: &str) -> PathBuf {
     use chrono::{DateTime, Local};
     let now: DateTime<Local> = Local::now();
-    let mut path = get_manifest_dir_path();
-    path.push(name);
-    path.push(format!("{}", now.format("%Y_%m_%d_%H_%M_%S")));
-    path
+    let mut p = PathBuf::new();
+    p.push(path);
+    p.push(name);
+    p.push(format!("{}", now.format("%Y_%m_%d_%H_%M_%S")));
+    p
 }
 
 pub fn create_dir(path: &Path) -> std::io::Result<()> {

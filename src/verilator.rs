@@ -1,3 +1,35 @@
+use std::path::{Path, PathBuf};
+
+pub struct Build {
+    out_dir: Option<PathBuf>,
+}
+
+impl Build {
+
+    fn get_out_dir(&self) -> PathBuf {
+        match &self.out_dir {
+            Some(d) => d.to_path_buf(),
+            None => panic!("out dir not defined"),
+        }
+    }
+
+    pub fn new() -> Build {
+        Build {
+            out_dir: None,
+        }
+    }
+
+    pub fn out_dir<P: AsRef<Path>>(&mut self, out: P) -> &mut Build {
+        self.out_dir = Some(out.as_ref().to_path_buf());
+        self
+    }
+
+    pub fn compile_verilog(&self) {
+        println!("{:?}", self.get_out_dir());
+    }
+}
+
+
 // use crate::util::{get_manifest_path, run_cmd};
 // use handlebars::Handlebars;
 // use libloading::{Library, Symbol};
