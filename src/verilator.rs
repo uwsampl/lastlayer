@@ -1,10 +1,22 @@
+use crate::util::{get_manifest_dir, run_cmd};
 use std::path::{Path, PathBuf};
+use std::process::Command;
 
 pub struct Build {
+    top: Option<String>,
+    verilog_files: Vec<PathBuf>,
     out_dir: Option<PathBuf>,
+    bin: Option<PathBuf>,
 }
 
 impl Build {
+
+    fn get_top(&self) -> String {
+        match self.top.clone() {
+            Some(p) => p,
+            None => panic!("Top module name not set"),
+        }
+    }
 
     fn get_out_dir(&self) -> PathBuf {
         match &self.out_dir {
@@ -13,10 +25,25 @@ impl Build {
         }
     }
 
+    fn get_bin(&self) -> PathBuf {
+        match &self.bin {
+            Some(b) => b.to_path_buf(),
+            None => panic!("binary path not defined"),
+        }
+    }
+
     pub fn new() -> Build {
         Build {
+            top: None,
+            verilog_files: Vec::new(),
             out_dir: None,
+            bin: Some(get_manifest_dir().join("verilator/build/bin/verilator")),
         }
+    }
+
+    pub fn top_module(&mut self, name: &str) -> &mut Build {
+        self.top = Some(name.to_string());
+        self
     }
 
     pub fn out_dir<P: AsRef<Path>>(&mut self, out: P) -> &mut Build {
@@ -24,8 +51,25 @@ impl Build {
         self
     }
 
+    pub fn verilog_file<P: AsRef<Path>>(&mut self, file: P) -> &mut Build {
+        self.verilog_files.push(file.as_ref().to_path_buf());
+        self
+    }
+
     pub fn compile_verilog(&self) {
-        println!("{:?}", self.get_out_dir());
+        let mut cmd = Command::new(self.get_bin());
+
+        cmd.arg("--cc")
+            .arg("-Mdir")
+            .arg(self.get_out_dir())
+            .arg("--top-module")
+            .arg(self.get_top());
+
+        for file in self.verilog_files.iter() {
+            cmd.arg(file);
+        }
+
+        run_cmd(&mut cmd);
     }
 }
 
@@ -37,7 +81,7 @@ impl Build {
 // use std::error::Error;
 // use std::fs::File;
 // use std::path::{Path, PathBuf};
-// use std::process::Command;
+
 
 // #[derive(Serialize)]
 // struct HandleBars {
@@ -204,10 +248,7 @@ impl Build {
 //         self
 //     }
 
-//     pub fn top_module(&mut self, name: &str) -> &mut Build {
-//         self.top = Some(name.to_string());
-//         self
-//     }
+
 
 //     pub fn dpi_flag(&mut self, flag: bool) -> &mut Build {
 //         self.dpi = flag;
