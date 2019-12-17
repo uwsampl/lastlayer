@@ -1,12 +1,28 @@
 use crate::util::{get_manifest_dir, run_cmd};
 use std::path::{Path, PathBuf};
+use handlebars::Handlebars;
+use serde::Serialize;
+use std::error::Error;
+use std::fs::File;
 use std::process::Command;
 
 pub struct Build {
+    virtual_top: Option<String>,
     top: Option<String>,
+    clock: Option<String>,
+    reset: Option<String>,
     verilog_files: Vec<PathBuf>,
     out_dir: Option<PathBuf>,
+    handlebars_dir: Option<PathBuf>,
     bin: Option<PathBuf>,
+}
+
+#[derive(Serialize)]
+struct VirtualHandle {
+    vtop: String,
+    top: String,
+    clock: String,
+    reset: String,
 }
 
 impl Build {
@@ -18,10 +34,38 @@ impl Build {
         }
     }
 
+    fn get_virtual_top(&self) -> String {
+        match self.virtual_top.clone() {
+            Some(p) => p,
+            None => panic!("Virtual top module name not set"),
+        }
+    }
+
+    fn get_clock(&self) -> String {
+        match self.clock.clone() {
+            Some(p) => p,
+            None => panic!("Clock name not set"),
+        }
+    }
+
+    fn get_reset(&self) -> String {
+        match self.reset.clone() {
+            Some(p) => p,
+            None => panic!("Reset name not set"),
+        }
+    }
+
     fn get_out_dir(&self) -> PathBuf {
         match &self.out_dir {
             Some(d) => d.to_path_buf(),
             None => panic!("out dir not defined"),
+        }
+    }
+
+    fn get_handlebars_dir(&self) -> PathBuf {
+        match &self.handlebars_dir {
+            Some(d) => d.to_path_buf(),
+            None => panic!("handlebars dir not defined"),
         }
     }
 
@@ -32,17 +76,52 @@ impl Build {
         }
     }
 
+    fn render(
+        &self,
+        input: &str,
+        output: &str
+    ) -> Result<(), Box<dyn Error>> {
+        let reg = Handlebars::new();
+        let handle = VirtualHandle {
+            vtop: self.get_virtual_top(),
+            top: self.get_top(),
+            clock: self.get_clock(),
+            reset: self.get_reset(),
+        };
+        let template_path = self.get_handlebars_dir().join(input);
+        let output_path = self.get_out_dir().join(output);
+        let mut template_file = File::open(template_path)?;
+        let mut output_file = File::create(output_path)?;
+        reg.render_template_source_to_write(&mut template_file, &handle, &mut output_file)?;
+        Ok(())
+    }
+
     pub fn new() -> Build {
         Build {
+            virtual_top: None,
             top: None,
+            clock: Some("clock".to_string()),
+            reset: Some("reset".to_string()),
             verilog_files: Vec::new(),
             out_dir: None,
+            handlebars_dir: Some(get_manifest_dir().join("src/handlebars")),
             bin: Some(get_manifest_dir().join("verilator/build/bin/verilator")),
         }
     }
 
     pub fn top_module(&mut self, name: &str) -> &mut Build {
         self.top = Some(name.to_string());
+        self.virtual_top = Some(format!("__{}", self.get_top()));
+        self
+    }
+
+    pub fn clock(&mut self, name: &str) -> &mut Build {
+        self.clock = Some(name.to_string());
+        self
+    }
+
+    pub fn reset(&mut self, name: &str) -> &mut Build {
+        self.reset = Some(name.to_string());
         self
     }
 
@@ -56,37 +135,40 @@ impl Build {
         self
     }
 
-    pub fn compile_verilog(&self) {
-        let mut cmd = Command::new(self.get_bin());
+    fn create_out_dir(&self) {
+        let mut cmd = Command::new("mkdir");
+        cmd.arg("-p")
+            .arg(self.get_out_dir());
+        run_cmd(&mut cmd);
+    }
 
+    fn create_virtual_top(&mut self) {
+        let virtual_name = "virtual_top.v";
+        let virtual_hbs = format!("{}.hbs", &virtual_name);
+        let virtual_file = self.get_out_dir().join(&virtual_name);
+        self.create_out_dir();
+        self.render(&virtual_hbs, &virtual_name).expect("failed to render virtual top");
+        self.verilog_file(&virtual_file);
+    }
+
+    fn _compile_verilog(&self) {
+        let mut cmd = Command::new(self.get_bin());
         cmd.arg("--cc")
             .arg("-Mdir")
             .arg(self.get_out_dir())
             .arg("--top-module")
-            .arg(self.get_top());
-
+            .arg(self.get_virtual_top());
         for file in self.verilog_files.iter() {
             cmd.arg(file);
         }
-
         run_cmd(&mut cmd);
     }
+
+    pub fn compile_verilog(&mut self) {
+        self.create_virtual_top();
+        self._compile_verilog();
+    }
 }
-
-
-// use crate::util::{get_manifest_path, run_cmd};
-// use handlebars::Handlebars;
-// use libloading::{Library, Symbol};
-// use serde::Serialize;
-// use std::error::Error;
-// use std::fs::File;
-// use std::path::{Path, PathBuf};
-
-
-// #[derive(Serialize)]
-// struct HandleBars {
-//     name: String,
-// }
 
 // pub struct Build {
 //     top: Option<String>,

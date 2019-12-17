@@ -1,0 +1,15 @@
+module {{vtop}}
+(
+    input {{clock}},
+    input {{reset}}
+);
+
+    {{top}} dut
+    (
+        .{{clock}}({{clock}}),
+        .{{reset}}({{reset}})
+    );
+
+    // __dpi_wig dpi();
+
+endmodule
