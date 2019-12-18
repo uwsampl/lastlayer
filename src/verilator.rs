@@ -7,10 +7,11 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 pub struct Build {
-    virtual_top: Option<String>,
-    top: Option<String>,
-    clock: Option<String>,
-    reset: Option<String>,
+    virtual_top_name: Option<String>,
+    virtual_top_filename: String,
+    top_name: Option<String>,
+    clock_name: Option<String>,
+    reset_name: Option<String>,
     dpi: bool,
     verilog_warnings: Vec<String>,
     verilog_files: Vec<PathBuf>,
@@ -31,28 +32,28 @@ struct VirtualHandle {
 
 impl Build {
     fn get_top(&self) -> String {
-        match self.top.clone() {
+        match self.top_name.clone() {
             Some(p) => p,
             None => panic!("Top module name not set"),
         }
     }
 
-    fn get_virtual_top(&self) -> String {
-        match self.virtual_top.clone() {
+    fn get_virtual_top_name(&self) -> String {
+        match self.virtual_top_name.clone() {
             Some(p) => p,
             None => panic!("Virtual top module name not set"),
         }
     }
 
     fn get_clock(&self) -> String {
-        match self.clock.clone() {
+        match self.clock_name.clone() {
             Some(p) => p,
             None => panic!("Clock name not set"),
         }
     }
 
     fn get_reset(&self) -> String {
-        match self.reset.clone() {
+        match self.reset_name.clone() {
             Some(p) => p,
             None => panic!("Reset name not set"),
         }
@@ -82,7 +83,7 @@ impl Build {
     fn render(&self, input: &str, output: &str) -> Result<(), Box<dyn Error>> {
         let reg = Handlebars::new();
         let handle = VirtualHandle {
-            vtop: self.get_virtual_top(),
+            vtop: self.get_virtual_top_name(),
             top: self.get_top(),
             clock: self.get_clock(),
             reset: self.get_reset(),
@@ -97,10 +98,11 @@ impl Build {
 
     pub fn new() -> Build {
         Build {
-            virtual_top: None,
-            top: None,
-            clock: Some("clock".to_string()),
-            reset: Some("reset".to_string()),
+            virtual_top_name: None,
+            virtual_top_filename: "virtual_top".to_string(),
+            top_name: None,
+            clock_name: Some("clock".to_string()),
+            reset_name: Some("reset".to_string()),
             dpi: false,
             verilog_warnings: Vec::new(),
             verilog_files: Vec::new(),
@@ -118,18 +120,18 @@ impl Build {
     }
 
     pub fn top_module(&mut self, name: &str) -> &mut Build {
-        self.top = Some(name.to_string());
-        self.virtual_top = Some(format!("__{}", self.get_top()));
+        self.top_name = Some(name.to_string());
+        self.virtual_top_name = Some(format!("__{}", self.get_top()));
         self
     }
 
     pub fn clock(&mut self, name: &str) -> &mut Build {
-        self.clock = Some(name.to_string());
+        self.clock_name = Some(name.to_string());
         self
     }
 
     pub fn reset(&mut self, name: &str) -> &mut Build {
-        self.reset = Some(name.to_string());
+        self.reset_name = Some(name.to_string());
         self
     }
 
@@ -169,22 +171,22 @@ impl Build {
     }
 
     fn create_virtual_verilog_top(&mut self) -> &mut Build {
-        let virtual_name = "virtual_top.v";
-        let virtual_hbs = format!("{}.hbs", &virtual_name);
-        let virtual_file = self.get_out_dir().join(&virtual_name);
-        self.render(&virtual_hbs, &virtual_name)
+        let v_name = format!("{}.v", self.virtual_top_filename);
+        let v_hbs = format!("{}.hbs", &v_name);
+        let v_file = self.get_out_dir().join(&v_name);
+        self.render(&v_hbs, &v_name)
             .expect("failed to render virtual top");
-        self.verilog_file(&virtual_file);
+        self.verilog_file(&v_file);
         self
     }
 
     fn create_virtual_cc_top(&mut self) -> &mut Build {
-        let virtual_name = "virtual_top.cc";
-        let virtual_hbs = format!("{}.hbs", &virtual_name);
-        let virtual_file = self.get_out_dir().join(&virtual_name);
-        self.render(&virtual_hbs, &virtual_name)
+        let cc_name = format!("{}.cc", self.virtual_top_filename);
+        let hbs_name = format!("{}.hbs", &cc_name);
+        let cc_file = self.get_out_dir().join(&cc_name);
+        self.render(&hbs_name, &cc_name)
             .expect("failed to render virtual top");
-        self.verilog_file(&virtual_file);
+        self.verilog_file(&cc_file);
         self
     }
 
@@ -194,7 +196,7 @@ impl Build {
             .arg("-Mdir")
             .arg(self.get_out_dir())
             .arg("--top-module")
-            .arg(self.get_virtual_top());
+            .arg(self.get_virtual_top_name());
         for file in self.verilog_files.iter() {
             cmd.arg(file);
         }
@@ -204,7 +206,14 @@ impl Build {
         run_cmd(&mut cmd);
     }
 
-    fn default_include_dir(&mut self) -> &mut Build {
+    fn default_cc_files(&mut self) -> &mut Build {
+        let out_dir = self.get_out_dir();
+        let virtual_filename = format!("{}.cc", self.virtual_top_filename);
+        self.cc_file(&out_dir.join(virtual_filename));
+        self
+    }
+
+    fn default_include_dirs(&mut self) -> &mut Build {
         let verilator_include_dir =
             get_manifest_dir().join("verilator/build/share/verilator/include");
         self.cc_include_dir(self.get_out_dir());
@@ -218,7 +227,8 @@ impl Build {
         self.create_virtual_verilog_top();
         self.create_virtual_cc_top();
         self.compile_verilog();
-        self.default_include_dir();
+        self.default_cc_files();
+        self.default_include_dirs();
         self
     }
 
