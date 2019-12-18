@@ -1,9 +1,9 @@
 use crate::util::{get_manifest_dir, run_cmd};
-use std::path::{Path, PathBuf};
 use handlebars::Handlebars;
 use serde::Serialize;
 use std::error::Error;
 use std::fs::File;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
 pub struct Build {
@@ -12,7 +12,7 @@ pub struct Build {
     clock: Option<String>,
     reset: Option<String>,
     dpi: bool,
-    warnings: Vec<String>,
+    verilog_warnings: Vec<String>,
     verilog_files: Vec<PathBuf>,
     cc_include_dirs: Vec<PathBuf>,
     cc_files: Vec<PathBuf>,
@@ -30,7 +30,6 @@ struct VirtualHandle {
 }
 
 impl Build {
-
     fn get_top(&self) -> String {
         match self.top.clone() {
             Some(p) => p,
@@ -80,11 +79,7 @@ impl Build {
         }
     }
 
-    fn render(
-        &self,
-        input: &str,
-        output: &str
-    ) -> Result<(), Box<dyn Error>> {
+    fn render(&self, input: &str, output: &str) -> Result<(), Box<dyn Error>> {
         let reg = Handlebars::new();
         let handle = VirtualHandle {
             vtop: self.get_virtual_top(),
@@ -107,7 +102,7 @@ impl Build {
             clock: Some("clock".to_string()),
             reset: Some("reset".to_string()),
             dpi: false,
-            warnings: Vec::new(),
+            verilog_warnings: Vec::new(),
             verilog_files: Vec::new(),
             cc_include_dirs: Vec::new(),
             cc_files: Vec::new(),
@@ -117,8 +112,8 @@ impl Build {
         }
     }
 
-    pub fn disable_warning(&mut self, name: &str) -> &mut Build {
-        self.warnings.push(name.to_string());
+    pub fn verilog_disable_warning(&mut self, name: &str) -> &mut Build {
+        self.verilog_warnings.push(name.to_string());
         self
     }
 
@@ -144,13 +139,15 @@ impl Build {
     }
 
     pub fn out_dir<P: AsRef<Path>>(&mut self, out: P) -> &mut Build {
-        // assert!(out.as_ref().is_dir(), "out_dir does not seems to be a directory");
         self.out_dir = Some(out.as_ref().to_path_buf());
         self
     }
 
     pub fn cc_include_dir<P: AsRef<Path>>(&mut self, dir: P) -> &mut Build {
-        // assert!(dir.as_ref().is_dir(), "include dir does not seems to be a directory");
+        assert!(
+            dir.as_ref().is_dir(),
+            "include dir does not seems to be a directory"
+        );
         self.cc_include_dirs.push(dir.as_ref().to_path_buf());
         self
     }
@@ -167,8 +164,7 @@ impl Build {
 
     fn create_out_dir(&self) {
         let mut cmd = Command::new("mkdir");
-        cmd.arg("-p")
-            .arg(self.get_out_dir());
+        cmd.arg("-p").arg(self.get_out_dir());
         run_cmd(&mut cmd);
     }
 
@@ -176,13 +172,13 @@ impl Build {
         let virtual_name = "virtual_top.v";
         let virtual_hbs = format!("{}.hbs", &virtual_name);
         let virtual_file = self.get_out_dir().join(&virtual_name);
-        self.create_out_dir();  // FIXME: move this to main compile
-        self.render(&virtual_hbs, &virtual_name).expect("failed to render virtual top");
+        self.render(&virtual_hbs, &virtual_name)
+            .expect("failed to render virtual top");
         self.verilog_file(&virtual_file);
         self
     }
 
-    fn compile_verilator(&self) {
+    fn compile_verilog(&self) {
         let mut cmd = Command::new(self.get_bin());
         cmd.arg("--cc")
             .arg("-Mdir")
@@ -192,55 +188,58 @@ impl Build {
         for file in self.verilog_files.iter() {
             cmd.arg(file);
         }
-        for warn in &self.warnings {
+        for warn in &self.verilog_warnings {
             cmd.arg(format!("-Wno-{}", warn));
         }
         run_cmd(&mut cmd);
     }
 
     fn default_include_dir(&mut self) -> &mut Build {
-        let verilator_include_dir = get_manifest_dir().join("verilator/build/share/verilator/include");
+        let verilator_include_dir =
+            get_manifest_dir().join("verilator/build/share/verilator/include");
         self.cc_include_dir(self.get_out_dir());
         self.cc_include_dir(&verilator_include_dir);
         self.cc_include_dir(&verilator_include_dir.join("vltstd"));
         self
     }
 
-    pub fn compile_verilog(&mut self) -> &mut Build {
+    pub fn compile(&mut self) -> &mut Build {
+        self.create_out_dir();
         self.create_virtual_top();
-        self.compile_verilator();
+        self.compile_verilog();
+        self.default_include_dir();
         self
     }
 
     // pub fn compile_cxx(&mut self) {
-        // let out_dir = self.get_out_dir();
-        // let mut cmd = Command::new("g++");
-        // cmd.arg("-shared")
-        //     .arg("-faligned-new")
-        //     .arg("-shared")
-        //     .arg("-fPIC")
-            // .arg("-I")
-            // .arg(&out_dir)
-            // .arg("-I")
-            // .arg(&v_include_dir)
-            // .arg("-I")
-            // .arg(&v_include_dir.join("vltstd"))
-//             .arg(&include_path.join("verilated.cpp"))
-//             .arg(&out_path.join(format!("V{}.cpp", self.get_top())))
-//             .arg(&out_path.join(format!("V{}__Syms.cpp", self.get_top())));
+    // let out_dir = self.get_out_dir();
+    // let mut cmd = Command::new("g++");
+    // cmd.arg("-shared")
+    //     .arg("-faligned-new")
+    //     .arg("-shared")
+    //     .arg("-fPIC")
+    // .arg("-I")
+    // .arg(&out_dir)
+    // .arg("-I")
+    // .arg(&v_include_dir)
+    // .arg("-I")
+    // .arg(&v_include_dir.join("vltstd"))
+    //             .arg(&include_path.join("verilated.cpp"))
+    //             .arg(&out_path.join(format!("V{}.cpp", self.get_top())))
+    //             .arg(&out_path.join(format!("V{}__Syms.cpp", self.get_top())));
 
-//         for file in self.cc_files.iter() {
-//             cmd.arg(file);
-//         }
+    //         for file in self.cc_files.iter() {
+    //             cmd.arg(file);
+    //         }
 
-//         if self.dpi {
-//             cmd.arg(&include_path.join("verilated_dpi.cpp"));
-//             cmd.arg(&out_path.join(format!("V{}__Dpi.cpp", self.get_top())));
-//         }
+    //         if self.dpi {
+    //             cmd.arg(&include_path.join("verilated_dpi.cpp"));
+    //             cmd.arg(&out_path.join(format!("V{}__Dpi.cpp", self.get_top())));
+    //         }
 
-//         cmd.arg("-o").arg(self.get_shared_lib_path());
+    //         cmd.arg("-o").arg(self.get_shared_lib_path());
 
-        // run_cmd(&mut cmd);
+    // run_cmd(&mut cmd);
     // }
 }
 
@@ -254,7 +253,7 @@ impl Build {
 //     sim_dpi_filename: String,
 //     lib_name: Option<String>,
 //     inclue_paths: Vec<PathBuf>,
-//     warnings: Vec<String>,
+//     verilog_warnings: Vec<String>,
 // }
 
 // impl Build {
@@ -285,7 +284,6 @@ impl Build {
 //             None => panic!("Verilator include library not found"),
 //         }
 //     }
-
 
 //     fn compile_cc(&mut self) {
 //         let include_path = self.get_include_path();
@@ -350,18 +348,16 @@ impl Build {
 //                 PathBuf::from("/usr/share/verilator/include"),
 //                 PathBuf::from("/usr/local/share/verilator/include"),
 //             ],
-//             warnings: Vec::new(),
+//             verilog_warnings: Vec::new(),
 //         }
 //     }
 
 //     pub fn warn_width(&mut self, flag: bool) -> &mut Build {
 //         if !flag {
-//             self.warnings.push("WIDTH".to_string());
+//             self.verilog_warnings.push("WIDTH".to_string());
 //         }
 //         self
 //     }
-
-
 
 //     pub fn dpi_flag(&mut self, flag: bool) -> &mut Build {
 //         self.dpi = flag;

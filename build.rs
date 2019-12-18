@@ -26,7 +26,6 @@ mod verilator {
     }
 
     impl Build {
-
         fn get_root_dir(&self) -> PathBuf {
             match &self.root_dir {
                 Some(d) => d.to_path_buf(),
@@ -117,8 +116,7 @@ mod verilator {
             self.cd_to_verilator_dir();
             let mut cmd = Command::new("make");
             if self.get_jobs() > 0 {
-                cmd.arg("-j")
-                    .arg(&format!("{}", self.get_jobs()));
+                cmd.arg("-j").arg(&format!("{}", self.get_jobs()));
             }
             run_cmd(&mut cmd);
             self.cd_to_root_dir();
