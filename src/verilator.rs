@@ -168,8 +168,18 @@ impl Build {
         run_cmd(&mut cmd);
     }
 
-    fn create_virtual_top(&mut self) -> &mut Build {
+    fn create_virtual_verilog_top(&mut self) -> &mut Build {
         let virtual_name = "virtual_top.v";
+        let virtual_hbs = format!("{}.hbs", &virtual_name);
+        let virtual_file = self.get_out_dir().join(&virtual_name);
+        self.render(&virtual_hbs, &virtual_name)
+            .expect("failed to render virtual top");
+        self.verilog_file(&virtual_file);
+        self
+    }
+
+    fn create_virtual_cc_top(&mut self) -> &mut Build {
+        let virtual_name = "virtual_top.cc";
         let virtual_hbs = format!("{}.hbs", &virtual_name);
         let virtual_file = self.get_out_dir().join(&virtual_name);
         self.render(&virtual_hbs, &virtual_name)
@@ -205,7 +215,8 @@ impl Build {
 
     pub fn compile(&mut self) -> &mut Build {
         self.create_out_dir();
-        self.create_virtual_top();
+        self.create_virtual_verilog_top();
+        self.create_virtual_cc_top();
         self.compile_verilog();
         self.default_include_dir();
         self
