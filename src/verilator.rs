@@ -12,6 +12,7 @@ pub struct Build {
     clock: Option<String>,
     reset: Option<String>,
     dpi: bool,
+    warnings: Vec<String>,
     verilog_files: Vec<PathBuf>,
     out_dir: Option<PathBuf>,
     handlebars_dir: Option<PathBuf>,
@@ -104,11 +105,17 @@ impl Build {
             clock: Some("clock".to_string()),
             reset: Some("reset".to_string()),
             dpi: false,
+            warnings: Vec::new(),
             verilog_files: Vec::new(),
             out_dir: None,
             handlebars_dir: Some(get_manifest_dir().join("src/handlebars")),
             bin: Some(get_manifest_dir().join("verilator/build/bin/verilator")),
         }
+    }
+
+    pub fn disable_warning(&mut self, name: &str) -> &mut Build {
+        self.warnings.push(name.to_string());
+        self
     }
 
     pub fn top_module(&mut self, name: &str) -> &mut Build {
@@ -169,6 +176,9 @@ impl Build {
             .arg(self.get_virtual_top());
         for file in self.verilog_files.iter() {
             cmd.arg(file);
+        }
+        for warn in &self.warnings {
+            cmd.arg(format!("-Wno-{}", warn));
         }
         run_cmd(&mut cmd);
     }
