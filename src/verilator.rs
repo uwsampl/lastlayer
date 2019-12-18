@@ -11,6 +11,7 @@ pub struct Build {
     top: Option<String>,
     clock: Option<String>,
     reset: Option<String>,
+    dpi: bool,
     verilog_files: Vec<PathBuf>,
     out_dir: Option<PathBuf>,
     handlebars_dir: Option<PathBuf>,
@@ -102,6 +103,7 @@ impl Build {
             top: None,
             clock: Some("clock".to_string()),
             reset: Some("reset".to_string()),
+            dpi: false,
             verilog_files: Vec::new(),
             out_dir: None,
             handlebars_dir: Some(get_manifest_dir().join("src/handlebars")),
@@ -125,6 +127,11 @@ impl Build {
         self
     }
 
+    pub fn dpi_flag(&mut self, flag: bool) -> &mut Build {
+        self.dpi = flag;
+        self
+    }
+
     pub fn out_dir<P: AsRef<Path>>(&mut self, out: P) -> &mut Build {
         assert!(out.as_ref().is_dir(), "out_dir does not seems to be a directory");
         self.out_dir = Some(out.as_ref().to_path_buf());
@@ -143,16 +150,17 @@ impl Build {
         run_cmd(&mut cmd);
     }
 
-    fn create_virtual_top(&mut self) {
+    fn create_virtual_top(&mut self) -> &mut Build {
         let virtual_name = "virtual_top.v";
         let virtual_hbs = format!("{}.hbs", &virtual_name);
         let virtual_file = self.get_out_dir().join(&virtual_name);
         self.create_out_dir();
         self.render(&virtual_hbs, &virtual_name).expect("failed to render virtual top");
         self.verilog_file(&virtual_file);
+        self
     }
 
-    fn _compile_verilog(&self) {
+    fn run_verilator(&self) {
         let mut cmd = Command::new(self.get_bin());
         cmd.arg("--cc")
             .arg("-Mdir")
@@ -165,9 +173,10 @@ impl Build {
         run_cmd(&mut cmd);
     }
 
-    pub fn compile_verilog(&mut self) {
+    pub fn compile_verilog(&mut self) -> &mut Build {
         self.create_virtual_top();
-        self._compile_verilog();
+        self.run_verilator();
+        self
     }
 }
 
@@ -185,16 +194,6 @@ impl Build {
 // }
 
 // impl Build {
-//     fn get_cc_path(&self, name: &str) -> PathBuf {
-//         let path = self.get_out_path();
-//         path.join(format!("{}.cc", name))
-//     }
-
-//     fn get_hbs_path(&self, name: &str) -> PathBuf {
-//         let manifest_path = get_manifest_path();
-//         let hsim_path = manifest_path.join("src/hsim");
-//         hsim_path.join(format!("{}.hbs", name))
-//     }
 
 //     fn render_template(
 //         &self,
