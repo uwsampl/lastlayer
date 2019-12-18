@@ -1,14 +1,17 @@
 #include "V{{vtop}}.h"
+#include "lastlayer.h"
 
 vluint64_t main_time = 0;
 
+#ifdef __cplusplus
 extern "C" {
+#endif
 
-void* alloc() {
+LLDeviceHandle alloc() {
   return new V{{vtop}};
 }
 
-void reset(void* handle, int cycles) {
+void reset(LLDeviceHandle handle, int cycles) {
   V{{vtop}}* top = static_cast<V{{vtop}}*>(handle);
   top->{{clock}} = 0;
   top->{{reset}} = 1;
@@ -28,7 +31,7 @@ void reset(void* handle, int cycles) {
 }
 
 
-void run(void* handle, int cycles) {
+void run(LLDeviceHandle handle, int cycles) {
   V{{vtop}}* top = static_cast<V{{vtop}}*>(handle);
   if (main_time > 0) {
       main_time = 0; // start counting cycles after reset
@@ -46,8 +49,10 @@ void run(void* handle, int cycles) {
   }
 }
 
-void dealloc(void* handle) {
+void dealloc(LLDeviceHandle handle) {
   delete static_cast<V{{vtop}}*>(handle);
 }
 
+#ifdef __cplusplus
 }
+#endif

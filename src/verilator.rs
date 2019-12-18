@@ -7,8 +7,8 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 pub struct Build {
+    tool_name: String,
     virtual_top_name: Option<String>,
-    virtual_top_filename: String,
     top_name: Option<String>,
     clock_name: Option<String>,
     reset_name: Option<String>,
@@ -98,8 +98,8 @@ impl Build {
 
     pub fn new() -> Build {
         Build {
+            tool_name: "lastlayer".to_string(),
             virtual_top_name: None,
-            virtual_top_filename: "virtual_top".to_string(),
             top_name: None,
             clock_name: Some("clock".to_string()),
             reset_name: Some("reset".to_string()),
@@ -171,7 +171,7 @@ impl Build {
     }
 
     fn create_virtual_verilog_top(&mut self) -> &mut Build {
-        let v_name = format!("{}.v", self.virtual_top_filename);
+        let v_name = format!("{}.v", self.tool_name);
         let v_hbs = format!("{}.hbs", &v_name);
         let v_file = self.get_out_dir().join(&v_name);
         self.render(&v_hbs, &v_name)
@@ -181,7 +181,7 @@ impl Build {
     }
 
     fn create_virtual_cc_top(&mut self) -> &mut Build {
-        let cc_name = format!("{}.cc", self.virtual_top_filename);
+        let cc_name = format!("{}.cc", self.tool_name);
         let hbs_name = format!("{}.hbs", &cc_name);
         let cc_file = self.get_out_dir().join(&cc_name);
         self.render(&hbs_name, &cc_name)
@@ -208,7 +208,7 @@ impl Build {
 
     fn default_cc_files(&mut self) -> &mut Build {
         let out_dir = self.get_out_dir();
-        let virtual_filename = format!("{}.cc", self.virtual_top_filename);
+        let virtual_filename = format!("{}.cc", self.tool_name);
         self.cc_file(&out_dir.join(virtual_filename));
         self
     }
