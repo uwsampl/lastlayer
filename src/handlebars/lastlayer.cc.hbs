@@ -34,7 +34,7 @@ void reset(LLDeviceHandle handle, int cycles) {
 void run(LLDeviceHandle handle, int cycles) {
   V{{vtop}}* top = static_cast<V{{vtop}}*>(handle);
   if (main_time > 0) {
-      main_time = 0; // start counting cycles after reset
+      main_time = 0; // reset cycle counter
   }
   top->{{clock}} = 0;
   while (!Verilated::gotFinish() && main_time < static_cast<vluint64_t>(cycles)) {
