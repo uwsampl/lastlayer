@@ -96,74 +96,6 @@ impl Build {
         Ok(())
     }
 
-    pub fn new() -> Build {
-        Build {
-            tool_name: "lastlayer".to_string(),
-            virtual_top_name: None,
-            top_name: None,
-            clock_name: Some("clock".to_string()),
-            reset_name: Some("reset".to_string()),
-            dpi: false,
-            verilog_warnings: Vec::new(),
-            verilog_files: Vec::new(),
-            cc_include_dirs: Vec::new(),
-            cc_files: Vec::new(),
-            out_dir: None,
-            handlebars_dir: Some(get_manifest_dir().join("src/handlebars")),
-            bin: Some(get_manifest_dir().join("verilator/build/bin/verilator")),
-        }
-    }
-
-    pub fn verilog_disable_warning(&mut self, name: &str) -> &mut Build {
-        self.verilog_warnings.push(name.to_string());
-        self
-    }
-
-    pub fn top_module(&mut self, name: &str) -> &mut Build {
-        self.top_name = Some(name.to_string());
-        self.virtual_top_name = Some(format!("__{}", self.get_top_name()));
-        self
-    }
-
-    pub fn clock(&mut self, name: &str) -> &mut Build {
-        self.clock_name = Some(name.to_string());
-        self
-    }
-
-    pub fn reset(&mut self, name: &str) -> &mut Build {
-        self.reset_name = Some(name.to_string());
-        self
-    }
-
-    pub fn dpi_flag(&mut self, flag: bool) -> &mut Build {
-        self.dpi = flag;
-        self
-    }
-
-    pub fn out_dir<P: AsRef<Path>>(&mut self, out: P) -> &mut Build {
-        self.out_dir = Some(out.as_ref().to_path_buf());
-        self
-    }
-
-    pub fn cc_include_dir<P: AsRef<Path>>(&mut self, dir: P) -> &mut Build {
-        assert!(
-            dir.as_ref().is_dir(),
-            "include dir does not seems to be a directory"
-        );
-        self.cc_include_dirs.push(dir.as_ref().to_path_buf());
-        self
-    }
-
-    pub fn cc_file<P: AsRef<Path>>(&mut self, file: P) -> &mut Build {
-        self.cc_files.push(file.as_ref().to_path_buf());
-        self
-    }
-
-    pub fn verilog_file<P: AsRef<Path>>(&mut self, file: P) -> &mut Build {
-        self.verilog_files.push(file.as_ref().to_path_buf());
-        self
-    }
-
     fn create_out_dir(&self) {
         let mut cmd = Command::new("mkdir");
         cmd.arg("-p").arg(self.get_out_dir());
@@ -243,6 +175,74 @@ impl Build {
         }
         cmd.arg("-o").arg(&out_dir.join(format!("lib{}.so", name)));
         run_cmd(&mut cmd);
+    }
+
+    pub fn new() -> Build {
+        Build {
+            tool_name: "lastlayer".to_string(),
+            virtual_top_name: None,
+            top_name: None,
+            clock_name: Some("clock".to_string()),
+            reset_name: Some("reset".to_string()),
+            dpi: false,
+            verilog_warnings: Vec::new(),
+            verilog_files: Vec::new(),
+            cc_include_dirs: Vec::new(),
+            cc_files: Vec::new(),
+            out_dir: None,
+            handlebars_dir: Some(get_manifest_dir().join("src/handlebars")),
+            bin: Some(get_manifest_dir().join("verilator/build/bin/verilator")),
+        }
+    }
+
+    pub fn verilog_disable_warning(&mut self, name: &str) -> &mut Build {
+        self.verilog_warnings.push(name.to_string());
+        self
+    }
+
+    pub fn top_module(&mut self, name: &str) -> &mut Build {
+        self.top_name = Some(name.to_string());
+        self.virtual_top_name = Some(format!("__{}", self.get_top_name()));
+        self
+    }
+
+    pub fn clock(&mut self, name: &str) -> &mut Build {
+        self.clock_name = Some(name.to_string());
+        self
+    }
+
+    pub fn reset(&mut self, name: &str) -> &mut Build {
+        self.reset_name = Some(name.to_string());
+        self
+    }
+
+    pub fn dpi_flag(&mut self, flag: bool) -> &mut Build {
+        self.dpi = flag;
+        self
+    }
+
+    pub fn out_dir<P: AsRef<Path>>(&mut self, out: P) -> &mut Build {
+        self.out_dir = Some(out.as_ref().to_path_buf());
+        self
+    }
+
+    pub fn cc_include_dir<P: AsRef<Path>>(&mut self, dir: P) -> &mut Build {
+        assert!(
+            dir.as_ref().is_dir(),
+            "include dir does not seems to be a directory"
+        );
+        self.cc_include_dirs.push(dir.as_ref().to_path_buf());
+        self
+    }
+
+    pub fn cc_file<P: AsRef<Path>>(&mut self, file: P) -> &mut Build {
+        self.cc_files.push(file.as_ref().to_path_buf());
+        self
+    }
+
+    pub fn verilog_file<P: AsRef<Path>>(&mut self, file: P) -> &mut Build {
+        self.verilog_files.push(file.as_ref().to_path_buf());
+        self
     }
 
     pub fn compile(&mut self, name: &str) -> &mut Build {
