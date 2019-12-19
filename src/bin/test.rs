@@ -8,5 +8,5 @@ fn main() {
         .out_dir(&out_dir)
         .top_module("test")
         .verilog_file(&v_dir.join("test.v"))
-        .compile();
+        .compile("test");
 }
