@@ -249,6 +249,16 @@ mod miniconda {
             run_cmd(&mut cmd);
         }
 
+        fn install_pytorch(&self) {
+            let m_dir = self.get_miniconda_dir();
+            let i_dir = m_dir.join(&self.miniconda_name);
+            let mut cmd = Command::new(&i_dir.join("bin/conda"));
+            cmd.arg("install")
+                .arg("-y")
+                .arg("pytorch");
+            run_cmd(&mut cmd);
+        }
+
         pub fn version(&mut self, ver: &str) -> &mut Build {
             self.version = Some(ver.to_string());
             self
@@ -280,6 +290,7 @@ mod miniconda {
                 self.wget_miniconda_sh();
                 self.chmod_miniconda_sh();
                 self.run_miniconda_sh();
+                self.install_pytorch();
             }
         }
     }
