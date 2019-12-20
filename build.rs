@@ -18,11 +18,11 @@ mod verilator {
 
     #[derive(Clone, Debug)]
     pub struct Build {
-        pub version: Option<String>,
-        pub jobs: Option<u32>,
-        pub root_dir: Option<PathBuf>,
-        pub verilator_dir: Option<PathBuf>,
-        pub build_dir: Option<PathBuf>,
+        version: Option<String>,
+        jobs: Option<u32>,
+        root_dir: Option<PathBuf>,
+        verilator_dir: Option<PathBuf>,
+        build_dir: Option<PathBuf>,
     }
 
     impl Build {
@@ -177,15 +177,130 @@ mod verilator {
     }
 }
 
+mod miniconda {
+
+    use super::*;
+
+    #[derive(Clone, Debug)]
+    pub struct Build {
+        version: Option<String>,
+        root_dir: Option<PathBuf>,
+        miniconda_dir: Option<PathBuf>,
+        miniconda_name: String,
+    }
+
+    impl Build {
+
+        fn get_version(&self) -> String {
+            match &self.version {
+                Some(s) => s.to_string(),
+                None => panic!("version not defined"),
+            }
+        }
+
+        fn get_miniconda_dir(&self) -> PathBuf {
+            match &self.miniconda_dir {
+                Some(d) => d.to_path_buf(),
+                None => panic!("miniconda dir not defined"),
+            }
+        }
+
+        fn create_miniconda_dir(&self) {
+            if !self.get_miniconda_dir().exists() {
+                let mut cmd = Command::new("mkdir");
+                cmd.arg("-p").arg(self.get_miniconda_dir());
+                run_cmd(&mut cmd);
+            }
+        }
+
+        fn wget_miniconda_sh(&self) {
+            let mut platform = String::new();
+            if cfg!(windows) {
+                panic!("Windows not supported because of Verilator");
+            } else if cfg!(linux) {
+                platform = "Linux-x86_64".to_string();
+            } else if cfg!(unix) {
+                platform = "MacOSX-x86_64".to_string();
+            }
+            let dir = self.get_miniconda_dir();
+            let script = format!("Miniconda{}-{}.sh", self.get_version(), platform);
+            let url = format!("https://repo.continuum.io/miniconda/{}", script);
+            let mut cmd = Command::new("wget");
+            cmd.arg(url)
+                .arg("-O")
+                .arg(&dir.join("miniconda.sh"));
+            run_cmd(&mut cmd);
+        }
+
+        fn chmod_miniconda_sh(&self) {
+            let dir = self.get_miniconda_dir();
+            let mut cmd = Command::new("chmod");
+            cmd.arg("+x")
+                .arg(&dir.join("miniconda.sh"));
+            run_cmd(&mut cmd);
+        }
+
+        fn run_miniconda_sh(&self) {
+            let dir = self.get_miniconda_dir();
+            let mut cmd = Command::new(&dir.join("miniconda.sh"));
+            cmd.arg("-b")
+                .arg("-p")
+                .arg(&dir.join(&self.miniconda_name));
+            run_cmd(&mut cmd);
+        }
+
+        pub fn version(&mut self, ver: &str) -> &mut Build {
+            self.version = Some(ver.to_string());
+            self
+        }
+
+        pub fn root_dir<P: AsRef<Path>>(&mut self, dir: P) -> &mut Build {
+            self.root_dir = Some(dir.as_ref().to_owned());
+            self
+        }
+
+        pub fn miniconda_dir<P: AsRef<Path>>(&mut self, dir: P) -> &mut Build {
+            self.miniconda_dir = Some(dir.as_ref().to_owned());
+            self
+        }
+
+        pub fn new() -> Build {
+            Build {
+                version: None,
+                root_dir: None,
+                miniconda_dir: None,
+                miniconda_name: "local".to_string(),
+            }
+        }
+
+        pub fn install(&self) {
+            let dir = self.get_miniconda_dir();
+            self.create_miniconda_dir();
+            if !&dir.join(&self.miniconda_name).exists() {
+                self.wget_miniconda_sh();
+                self.chmod_miniconda_sh();
+                self.run_miniconda_sh();
+            }
+        }
+    }
+
+}
+
 fn main() {
     let root_dir = current_dir().unwrap();
     let verilator_dir = root_dir.join("verilator");
-    let build_dir = verilator_dir.join("build");
+    let verilator_build_dir = verilator_dir.join("build");
+    let miniconda_dir = root_dir.join("miniconda");
     verilator::Build::new()
-        .version(&"4.024")
+        .version("4.024")
         .jobs(1)
         .root_dir(&root_dir)
         .verilator_dir(&verilator_dir)
-        .build_dir(&build_dir)
+        .build_dir(&verilator_build_dir)
         .compile();
+    miniconda::Build::new()
+        .version("3-4.7.12.1")
+        .root_dir(&root_dir)
+        .miniconda_dir(&miniconda_dir)
+        .install();
 }
