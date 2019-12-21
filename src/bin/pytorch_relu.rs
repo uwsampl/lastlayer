@@ -18,5 +18,6 @@ fn main() {
         .cc_link_lib("torch_python")
         .cc_file(&pytorch_dir.join("relu.cc"))
         .verilog_file(&pytorch_dir.join("relu.v"))
+        .verilog_file(&pytorch_dir.join("relu_dpi.v"))
         .compile("relu");
 }

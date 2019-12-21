@@ -8,5 +8,6 @@ fn main() {
         .out_dir(&build_dir)
         .top_module("adder")
         .verilog_file(&numpy_dir.join("adder.v"))
+        .verilog_file(&numpy_dir.join("adder_dpi.v"))
         .compile("adder");
 }
