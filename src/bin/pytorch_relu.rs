@@ -2,7 +2,8 @@ use lastlayer::util::get_manifest_dir;
 use lastlayer::Build;
 
 fn main() {
-    let miniconda_torch_dir = get_manifest_dir().join("miniconda/local/lib/python3.7/site-packages/torch");
+    let miniconda_torch_dir =
+        get_manifest_dir().join("miniconda/local/lib/python3.7/site-packages/torch");
     let pytorch_dir = get_manifest_dir().join("pytorch");
     let build_dir = pytorch_dir.join("build");
     Build::new()
