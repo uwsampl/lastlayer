@@ -171,6 +171,9 @@ impl Build {
         for dir in self.cc_include_dirs.iter() {
             cmd.arg("-I").arg(dir);
         }
+        for dir in self.cc_link_dirs.iter() {
+            cmd.arg("-L").arg(dir);
+        }
         for file in self.cc_files.iter() {
             cmd.arg(file);
         }
