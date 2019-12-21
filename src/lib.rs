@@ -18,6 +18,7 @@ pub struct Build {
     verilog_warnings: Vec<String>,
     verilog_files: Vec<PathBuf>,
     cc_include_dirs: Vec<PathBuf>,
+    cc_link_dirs: Vec<PathBuf>,
     cc_files: Vec<PathBuf>,
     out_dir: Option<PathBuf>,
     handlebars_dir: Option<PathBuf>,
@@ -141,8 +142,7 @@ impl Build {
     }
 
     fn default_cc_files(&mut self) -> &mut Build {
-        let include_dir =
-            get_manifest_dir().join("verilator/build/share/verilator/include");
+        let include_dir = get_manifest_dir().join("verilator/build/share/verilator/include");
         let out_dir = self.get_out_dir();
         self.cc_file(&include_dir.join("verilated.cpp"));
         self.cc_file(&out_dir.join(format!("{}.cc", self.tool_name)));
@@ -153,8 +153,7 @@ impl Build {
 
     fn default_include_dirs(&mut self) -> &mut Build {
         let include_dir = get_manifest_dir().join("include/lastlayer");
-        let verilator_dir =
-            get_manifest_dir().join("verilator/build/share/verilator/include");
+        let verilator_dir = get_manifest_dir().join("verilator/build/share/verilator/include");
         self.cc_include_dir(self.get_out_dir());
         self.cc_include_dir(&verilator_dir);
         self.cc_include_dir(&verilator_dir.join("vltstd"));
@@ -190,6 +189,7 @@ impl Build {
             verilog_warnings: Vec::new(),
             verilog_files: Vec::new(),
             cc_include_dirs: Vec::new(),
+            cc_link_dirs: Vec::new(),
             cc_files: Vec::new(),
             out_dir: None,
             handlebars_dir: Some(get_manifest_dir().join("src/handlebars")),
@@ -237,6 +237,15 @@ impl Build {
         self
     }
 
+    pub fn cc_link_dir<P: AsRef<Path>>(&mut self, dir: P) -> &mut Build {
+        assert!(
+            dir.as_ref().is_dir(),
+            "linking dir does not seems to be a directory"
+        );
+        self.cc_link_dirs.push(dir.as_ref().to_path_buf());
+        self
+    }
+
     pub fn cc_file<P: AsRef<Path>>(&mut self, file: P) -> &mut Build {
         self.cc_files.push(file.as_ref().to_path_buf());
         self
@@ -257,6 +266,4 @@ impl Build {
         self.compile_cxx(name);
         self
     }
-
 }
-

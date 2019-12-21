@@ -190,7 +190,6 @@ mod miniconda {
     }
 
     impl Build {
-
         fn get_version(&self) -> String {
             match &self.version {
                 Some(s) => s.to_string(),
@@ -226,26 +225,21 @@ mod miniconda {
             let script = format!("Miniconda{}-{}.sh", self.get_version(), platform);
             let url = format!("https://repo.continuum.io/miniconda/{}", script);
             let mut cmd = Command::new("wget");
-            cmd.arg(url)
-                .arg("-O")
-                .arg(&dir.join("miniconda.sh"));
+            cmd.arg(url).arg("-O").arg(&dir.join("miniconda.sh"));
             run_cmd(&mut cmd);
         }
 
         fn chmod_miniconda_sh(&self) {
             let dir = self.get_miniconda_dir();
             let mut cmd = Command::new("chmod");
-            cmd.arg("+x")
-                .arg(&dir.join("miniconda.sh"));
+            cmd.arg("+x").arg(&dir.join("miniconda.sh"));
             run_cmd(&mut cmd);
         }
 
         fn run_miniconda_sh(&self) {
             let dir = self.get_miniconda_dir();
             let mut cmd = Command::new(&dir.join("miniconda.sh"));
-            cmd.arg("-b")
-                .arg("-p")
-                .arg(&dir.join(&self.miniconda_name));
+            cmd.arg("-b").arg("-p").arg(&dir.join(&self.miniconda_name));
             run_cmd(&mut cmd);
         }
 
@@ -253,9 +247,7 @@ mod miniconda {
             let m_dir = self.get_miniconda_dir();
             let i_dir = m_dir.join(&self.miniconda_name);
             let mut cmd = Command::new(&i_dir.join("bin/conda"));
-            cmd.arg("install")
-                .arg("-y")
-                .arg("pytorch");
+            cmd.arg("install").arg("-y").arg("pytorch");
             run_cmd(&mut cmd);
         }
 
@@ -294,7 +286,6 @@ mod miniconda {
             }
         }
     }
-
 }
 
 fn main() {
