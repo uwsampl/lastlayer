@@ -7,11 +7,11 @@ vluint64_t main_time = 0;
 extern "C" {
 #endif
 
-LLDeviceHandle alloc() {
+LastLayerHandle LastLayerAlloc() {
   return new V{{vtop}};
 }
 
-void reset(LLDeviceHandle handle, int cycles) {
+void LastLayerReset(LastLayerHandle handle, int cycles) {
   V{{vtop}}* top = static_cast<V{{vtop}}*>(handle);
   top->{{clock}} = 0;
   top->{{reset}} = 1;
@@ -31,7 +31,7 @@ void reset(LLDeviceHandle handle, int cycles) {
 }
 
 
-void run(LLDeviceHandle handle, int cycles) {
+void LastLayerRun(LastLayerHandle handle, int cycles) {
   V{{vtop}}* top = static_cast<V{{vtop}}*>(handle);
   if (main_time > 0) {
       main_time = 0; // reset cycle counter
@@ -49,7 +49,7 @@ void run(LLDeviceHandle handle, int cycles) {
   }
 }
 
-void dealloc(LLDeviceHandle handle) {
+void LastLayerDealloc(LastLayerHandle handle) {
   delete static_cast<V{{vtop}}*>(handle);
 }
 

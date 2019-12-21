@@ -2,13 +2,13 @@
 extern "C" {
 #endif
 
-typedef void* LLDeviceHandle;
+typedef void* LastLayerHandle;
 
-LLDeviceHandle alloc();
-void dealloc(LLDeviceHandle handle);
+LastLayerHandle LastLayerAlloc();
+void LastLayerDealloc(LastLayerHandle handle);
 
-void reset(LLDeviceHandle handle, int cycles);
-void run(LLDeviceHandle handle, int cycles);
+void LastLayerReset(LastLayerHandle handle, int cycles);
+void LastLayerRun(LastLayerHandle handle, int cycles);
 
 #ifdef __cplusplus
 }
