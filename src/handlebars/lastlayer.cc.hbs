@@ -1,33 +1,52 @@
 #include "V{{vtop}}.h"
 #include "lastlayer.h"
+#include <cassert>
 
 vluint64_t main_time = 0;
+
+double sc_time_stamp() { return main_time; }
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 LastLayerHandle LastLayerAlloc() {
-  return new V{{vtop}};
+    return new V{{vtop}};
+}
+
+void LastLayerDealloc(LastLayerHandle handle) {
+    delete static_cast<V{{vtop}}*>(handle);
+}
+
+char LastLayerReadReg(LastLayerHandle handle, int hid, int sel) {
+    assert( handle != nullptr );
+    svSetScope(svGetScopeFromName("TOP.{{vtop}}.dpi"));
+    return dpi_read_reg(hid, sel);
+}
+
+void LastLayerWriteReg(LastLayerHandle handle, int hid, int sel, char value) {
+    assert( handle != nullptr );
+    svSetScope(svGetScopeFromName("TOP.{{vtop}}.dpi"));
+    dpi_write_reg(hid, sel, value);
 }
 
 void LastLayerReset(LastLayerHandle handle, int cycles) {
-  V{{vtop}}* top = static_cast<V{{vtop}}*>(handle);
-  top->{{clock}} = 0;
-  top->{{reset}} = 1;
-  while (!Verilated::gotFinish() && main_time < static_cast<vluint64_t>(cycles)) {
-    if (main_time > static_cast<vluint64_t>(cycles)) {
-      top->{{reset}} = 0;
+    V{{vtop}}* top = static_cast<V{{vtop}}*>(handle);
+    top->{{clock}} = 0;
+    top->{{reset}} = 1;
+    while (!Verilated::gotFinish() && main_time < static_cast<vluint64_t>(cycles)) {
+        if (main_time > static_cast<vluint64_t>(cycles)) {
+            top->{{reset}} = 0;
+        }
+        if ((main_time % 10) == 1) {
+            top->{{clock}} = 1;
+        }
+        if ((main_time % 10) == 6) {
+            top->{{clock}} = 0;
+        }
+        top->eval();
+        main_time++;
     }
-    if ((main_time % 10) == 1) {
-      top->{{clock}} = 1;
-    }
-    if ((main_time % 10) == 6) {
-      top->{{clock}} = 0;
-    }
-    top->eval();
-    main_time++;
-  }
 }
 
 
@@ -38,19 +57,15 @@ void LastLayerRun(LastLayerHandle handle, int cycles) {
   }
   top->{{clock}} = 0;
   while (!Verilated::gotFinish() && main_time < static_cast<vluint64_t>(cycles)) {
-    if ((main_time % 10) == 1) {
-      top->{{clock}} = 1;
-    }
-    if ((main_time % 10) == 6) {
-      top->{{clock}} = 0;
-    }
-    top->eval();
-    main_time++;
+      if ((main_time % 10) == 1) {
+          top->{{clock}} = 1;
+      }
+      if ((main_time % 10) == 6) {
+          top->{{clock}} = 0;
+      }
+      top->eval();
+      main_time++;
   }
-}
-
-void LastLayerDealloc(LastLayerHandle handle) {
-  delete static_cast<V{{vtop}}*>(handle);
 }
 
 #ifdef __cplusplus

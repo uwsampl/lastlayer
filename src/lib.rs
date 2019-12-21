@@ -14,7 +14,6 @@ pub struct Build {
     top_name: Option<String>,
     clock_name: Option<String>,
     reset_name: Option<String>,
-    dpi: bool,
     verilog_warnings: Vec<String>,
     verilog_files: Vec<PathBuf>,
     cc_flags: Vec<String>,
@@ -147,9 +146,11 @@ impl Build {
         let include_dir = get_manifest_dir().join("verilator/build/share/verilator/include");
         let out_dir = self.get_out_dir();
         self.cc_file(&include_dir.join("verilated.cpp"));
+        self.cc_file(&include_dir.join("verilated_dpi.cpp"));
         self.cc_file(&out_dir.join(format!("{}.cc", self.tool_name)));
         self.cc_file(&out_dir.join(format!("V{}.cpp", self.get_virtual_top_name())));
         self.cc_file(&out_dir.join(format!("V{}__Syms.cpp", self.get_virtual_top_name())));
+        self.cc_file(&out_dir.join(format!("V{}__Dpi.cpp", self.get_virtual_top_name())));
         self
     }
 
@@ -196,7 +197,6 @@ impl Build {
             top_name: None,
             clock_name: Some("clock".to_string()),
             reset_name: Some("reset".to_string()),
-            dpi: false,
             verilog_warnings: Vec::new(),
             verilog_files: Vec::new(),
             cc_flags: Vec::new(),
@@ -228,11 +228,6 @@ impl Build {
 
     pub fn reset(&mut self, name: &str) -> &mut Build {
         self.reset_name = Some(name.to_string());
-        self
-    }
-
-    pub fn dpi_flag(&mut self, flag: bool) -> &mut Build {
-        self.dpi = flag;
         self
     }
 
