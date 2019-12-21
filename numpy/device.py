@@ -13,10 +13,12 @@ class Device:
         self.handle = self.lib.LastLayerAlloc()
     def __del__(self):
         self.lib.LastLayerDealloc(self.handle)
-    def read(self, hid, sel):
+    def read_reg(self, hid):
+        sel = 0
         return int.from_bytes(self.lib.LastLayerReadReg(self.handle, hid, sel), byteorder="big")
-    def write(self, hid, sel, value):
-        self.lib.LastLayerWriteReg(self.handle, hid, sel, value)
+    def write_reg(self, hid, value):
+        sel = 0
+        self.lib.LastLayerWriteReg(self.handle, hid, sel, int(value))
     def reset(self, cycles):
         self.lib.LastLayerReset(self.handle, cycles)
     def run(self, cycles):

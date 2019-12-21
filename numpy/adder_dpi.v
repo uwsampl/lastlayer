@@ -5,23 +5,63 @@ module __adder_dpi;
     export "DPI-C" function dpi_read_reg;
     export "DPI-C" function dpi_write_reg;
 
-    function byte dpi_read_r0;
+    function byte dpi_read_a;
         input int sel;
-        reg [32-1:0] data;
+        reg [8-1:0] data;
         begin
-            data = __adder.dut.r0;
+            data = __adder.dut.a;
             return data[sel*8 +: 8];
         end
     endfunction
 
-    function void dpi_write_r0;
+    function void dpi_write_a;
         input int sel;
         input byte value;
-        reg [32-1:0] data;
+        reg [8-1:0] data;
         begin
-            data = __adder.dut.r0;
+            data = __adder.dut.a;
             data[sel*8 +: 8] = value;
-            __adder.dut.r0 = data;
+            __adder.dut.a = data;
+        end
+    endfunction
+
+    function byte dpi_read_b;
+        input int sel;
+        reg [8-1:0] data;
+        begin
+            data = __adder.dut.b;
+            return data[sel*8 +: 8];
+        end
+    endfunction
+
+    function void dpi_write_b;
+        input int sel;
+        input byte value;
+        reg [8-1:0] data;
+        begin
+            data = __adder.dut.b;
+            data[sel*8 +: 8] = value;
+            __adder.dut.b = data;
+        end
+    endfunction
+
+    function byte dpi_read_y;
+        input int sel;
+        reg [8-1:0] data;
+        begin
+            data = __adder.dut.y;
+            return data[sel*8 +: 8];
+        end
+    endfunction
+
+    function void dpi_write_y;
+        input int sel;
+        input byte value;
+        reg [8-1:0] data;
+        begin
+            data = __adder.dut.y;
+            data[sel*8 +: 8] = value;
+            __adder.dut.y = data;
         end
     endfunction
 
@@ -30,7 +70,13 @@ module __adder_dpi;
         input int sel;
         begin
             if (hid == 0) begin
-                return dpi_read_r0(sel);
+                return dpi_read_a(sel);
+            end
+            else if (hid == 1) begin
+                return dpi_read_b(sel);
+            end
+            else if (hid == 2) begin
+                return dpi_read_y(sel);
             end
             else begin
                 $error("[dpi-read-reg] invalid hid");
@@ -44,7 +90,13 @@ module __adder_dpi;
         input byte value;
         begin
             if (hid == 0) begin
-                dpi_write_r0(sel, value);
+                dpi_write_a(sel, value);
+            end
+            else if (hid == 1) begin
+                dpi_write_b(sel, value);
+            end
+            else if (hid == 2) begin
+                dpi_write_y(sel, value);
             end
             else begin
                 $error("[dpi-write-reg] invalid hid");

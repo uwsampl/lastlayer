@@ -1,13 +1,17 @@
 module adder(input clock, input reset);
 
-    reg [31:0] r0;
+    reg [7:0] a;
+    reg [7:0] b;
+    reg [7:0] y;
 
     always @(posedge clock) begin
         if (reset) begin
-            r0 <= 0;
+            a <= 0;
+            b <= 0;
+            y <= 0;
         end
         else begin
-            r0 <= r0 + 1;
+            y <= a + b;
         end
     end
 

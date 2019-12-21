@@ -34,6 +34,9 @@ void LastLayerReset(LastLayerHandle handle, int cycles) {
     V{{vtop}}* top = static_cast<V{{vtop}}*>(handle);
     top->{{clock}} = 0;
     top->{{reset}} = 1;
+    if (main_time > 0) {
+        main_time = 0;
+    }
     while (!Verilated::gotFinish() && main_time < static_cast<vluint64_t>(cycles*10)) {
         if ((main_time % 10) == 1) {
             top->{{clock}} = 1;
@@ -52,7 +55,7 @@ void LastLayerRun(LastLayerHandle handle, int cycles) {
   V{{vtop}}* top = static_cast<V{{vtop}}*>(handle);
   top->{{clock}} = 0;
   if (main_time > 0) {
-      main_time = 0; // reset cycle counter
+      main_time = 0;
   }
   while (!Verilated::gotFinish() && main_time < static_cast<vluint64_t>(cycles*10)) {
       if ((main_time % 10) == 1) {
