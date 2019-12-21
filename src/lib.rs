@@ -142,6 +142,11 @@ impl Build {
         run_cmd(&mut cmd);
     }
 
+    fn default_verilog_warning(&mut self) -> &mut Build {
+        self.verilog_disable_warning("BLKANDNBLK");
+        self
+    }
+
     fn default_cc_files(&mut self) -> &mut Build {
         let include_dir = get_manifest_dir().join("verilator/build/share/verilator/include");
         let out_dir = self.get_out_dir();
@@ -278,6 +283,7 @@ impl Build {
         self.create_out_dir();
         self.create_virtual_verilog_top();
         self.create_virtual_cc_top();
+        self.default_verilog_warning();
         self.compile_verilog();
         self.default_cc_files();
         self.default_include_dirs();
