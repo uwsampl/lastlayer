@@ -2,6 +2,7 @@ use std::env::{current_dir, set_current_dir};
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use os_info;
 
 fn run_cmd(cmd: &mut Command) {
     println!("running {:?}", cmd);
@@ -213,14 +214,12 @@ mod miniconda {
         }
 
         fn wget_miniconda_sh(&self) {
-            let mut platform = String::new();
-            if cfg!(windows) {
-                panic!("Windows not supported because of Verilator");
-            } else if cfg!(linux) {
-                platform = "Linux-x86_64".to_string();
-            } else if cfg!(unix) {
-                platform = "MacOSX-x86_64".to_string();
-            }
+            let info = os_info::get();
+            let platform = match info.os_type() {
+                os_info::Type::Windows => panic!("Windows not supported because of Verilator"),
+                os_info::Type::Macos => "MacOSX-x86_64".to_string(),
+                _ => "Linux-x86_64".to_string(),
+            };
             let dir = self.get_miniconda_dir();
             let script = format!("Miniconda{}-{}.sh", self.get_version(), platform);
             let url = format!("https://repo.continuum.io/miniconda/{}", script);
