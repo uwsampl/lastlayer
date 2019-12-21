@@ -19,6 +19,7 @@ pub struct Build {
     verilog_files: Vec<PathBuf>,
     cc_include_dirs: Vec<PathBuf>,
     cc_link_dirs: Vec<PathBuf>,
+    cc_link_libs: Vec<String>,
     cc_files: Vec<PathBuf>,
     out_dir: Option<PathBuf>,
     handlebars_dir: Option<PathBuf>,
@@ -174,6 +175,9 @@ impl Build {
         for dir in self.cc_link_dirs.iter() {
             cmd.arg("-L").arg(dir);
         }
+        for lib in self.cc_link_libs.iter() {
+            cmd.arg(format!("-l{}", lib));
+        }
         for file in self.cc_files.iter() {
             cmd.arg(file);
         }
@@ -193,6 +197,7 @@ impl Build {
             verilog_files: Vec::new(),
             cc_include_dirs: Vec::new(),
             cc_link_dirs: Vec::new(),
+            cc_link_libs: Vec::new(),
             cc_files: Vec::new(),
             out_dir: None,
             handlebars_dir: Some(get_manifest_dir().join("src/handlebars")),
@@ -246,6 +251,11 @@ impl Build {
             "linking dir does not seems to be a directory"
         );
         self.cc_link_dirs.push(dir.as_ref().to_path_buf());
+        self
+    }
+
+    pub fn cc_link_lib(&mut self, name: &str) -> &mut Build {
+        self.cc_link_libs.push(name.to_string());
         self
     }
 
