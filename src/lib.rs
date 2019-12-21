@@ -17,6 +17,7 @@ pub struct Build {
     dpi: bool,
     verilog_warnings: Vec<String>,
     verilog_files: Vec<PathBuf>,
+    cc_flags: Vec<String>,
     cc_include_dirs: Vec<PathBuf>,
     cc_link_dirs: Vec<PathBuf>,
     cc_link_libs: Vec<String>,
@@ -178,6 +179,9 @@ impl Build {
         for lib in self.cc_link_libs.iter() {
             cmd.arg(format!("-l{}", lib));
         }
+        for flag in self.cc_flags.iter() {
+            cmd.arg(flag);
+        }
         for file in self.cc_files.iter() {
             cmd.arg(file);
         }
@@ -195,6 +199,7 @@ impl Build {
             dpi: false,
             verilog_warnings: Vec::new(),
             verilog_files: Vec::new(),
+            cc_flags: Vec::new(),
             cc_include_dirs: Vec::new(),
             cc_link_dirs: Vec::new(),
             cc_link_libs: Vec::new(),
@@ -233,6 +238,11 @@ impl Build {
 
     pub fn out_dir<P: AsRef<Path>>(&mut self, out: P) -> &mut Build {
         self.out_dir = Some(out.as_ref().to_path_buf());
+        self
+    }
+
+    pub fn cc_flag(&mut self, name: &str) -> &mut Build {
+        self.cc_flags.push(name.to_string());
         self
     }
 
