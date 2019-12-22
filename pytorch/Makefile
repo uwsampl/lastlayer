@@ -1,12 +1,10 @@
-# PYTHON = $(abspath ..)/miniconda/local/bin/python3.7
+PYTHON = $(abspath ..)/miniconda/local/bin/python3.7
 
-# run: build/librelu.so
-# 	${PYTHON} relu.py
+run: build/librelu.so
+	${PYTHON} relu.py
 
-# build/librelu.so:
-# 	cargo run --bin pytorch_relu
-
-default: verilog/Relu.v
+build/librelu.so: verilog/Relu.v
+	cargo run --bin pytorch_relu
 
 verilog/Relu.v:
 	cd chisel && sbt 'runMain relu.Relu --target-dir ../verilog'
