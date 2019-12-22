@@ -148,7 +148,6 @@ module __Relu_dpi;
         input byte value;
         begin
             if (hid == 0) begin
-                $display("write mem, addr:%x sel:%x value:%d", addr, sel, value);
                 dpi_write_mem_rmem(addr, sel, value);
             end
             else if (hid == 1) begin

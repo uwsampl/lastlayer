@@ -41,8 +41,17 @@ torch::Tensor read_mem(TorchDeviceHandle handle,
                        int64_t addr,
                        int64_t wordsize,
                        int64_t numel) {
-    torch::Tensor tensor = torch::ones(numel, torch::kInt8);
-    return tensor;
+    torch::Tensor output = torch::ones(numel, torch::kInt8);
+    TORCH_CHECK(output.is_contiguous());
+    int8_t* a = (int8_t*)output.data_ptr();
+    int start_addr = addr;
+    for (int i = 0; i < numel; i = i + wordsize) {
+        for (int j = 0; j < wordsize; j++) {
+            *a++ = LastLayerReadMem(reinterpret_cast<LastLayerHandle>(handle), hid, start_addr, j);
+        }
+        start_addr++;
+    }
+    return output;
 }
 
 void reset(TorchDeviceHandle handle, int64_t cycles) {
