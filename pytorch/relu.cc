@@ -23,13 +23,13 @@ void write_reg(TorchDeviceHandle handle, int64_t hid, int64_t sel, int64_t value
 void write_mem(TorchDeviceHandle handle,
                int64_t hid,
                int64_t start_addr,
-               int64_t word_size,
+               int64_t num_word,
                torch::Tensor input) {
   TORCH_CHECK(input.is_contiguous());
   int8_t* a = (int8_t*)input.data_ptr();
   int saddr = start_addr;
-  for (int i = 0; i < input.numel(); i = i + word_size) {
-    for (int j = 0; j < word_size; j++) {
+  for (int i = 0; i < input.numel(); i = i + num_word) {
+    for (int j = 0; j < num_word; j++) {
         LastLayerWriteMem(reinterpret_cast<LastLayerHandle>(handle), hid, saddr, j, *a++);
     }
     saddr++;
@@ -39,14 +39,14 @@ void write_mem(TorchDeviceHandle handle,
 torch::Tensor read_mem(TorchDeviceHandle handle,
                        int64_t hid,
                        int64_t start_addr,
-                       int64_t word_size,
-                       int64_t numel) {
-    torch::Tensor output = torch::ones(numel, torch::kInt8);
+                       int64_t num_word,
+                       int64_t num_elem) {
+    torch::Tensor output = torch::ones(num_elem, torch::kInt8);
     TORCH_CHECK(output.is_contiguous());
     int8_t* a = (int8_t*)output.data_ptr();
     int saddr = start_addr;
-    for (int i = 0; i < numel; i = i + word_size) {
-        for (int j = 0; j < word_size; j++) {
+    for (int i = 0; i < num_elem; i = i + num_word) {
+        for (int j = 0; j < num_word; j++) {
             *a++ = LastLayerReadMem(reinterpret_cast<LastLayerHandle>(handle), hid, saddr, j);
         }
         saddr++;
@@ -54,12 +54,12 @@ torch::Tensor read_mem(TorchDeviceHandle handle,
     return output;
 }
 
-void reset(TorchDeviceHandle handle, int64_t cycles) {
-    LastLayerReset(reinterpret_cast<LastLayerHandle>(handle), cycles);
+void reset(TorchDeviceHandle handle, int64_t n) {
+    LastLayerReset(reinterpret_cast<LastLayerHandle>(handle), n);
 }
 
-void run(TorchDeviceHandle handle, int64_t cycles) {
-    LastLayerRun(reinterpret_cast<LastLayerHandle>(handle), cycles);
+void run(TorchDeviceHandle handle, int64_t n) {
+    LastLayerRun(reinterpret_cast<LastLayerHandle>(handle), n);
 }
 
 std::vector<torch::RegisterOperators> register_device_api() {
