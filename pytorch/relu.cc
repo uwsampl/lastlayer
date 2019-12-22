@@ -20,7 +20,11 @@ void write_reg(TorchDeviceHandle handle, int64_t hid, int64_t sel, int64_t value
     LastLayerWriteReg(reinterpret_cast<LastLayerHandle>(handle), hid, sel, value);
 }
 
-void write_mem(TorchDeviceHandle handle, int64_t hid, int64_t addr, int64_t wordsize, torch::Tensor input) {
+void write_mem(TorchDeviceHandle handle,
+               int64_t hid,
+               int64_t addr,
+               int64_t wordsize,
+               torch::Tensor input) {
   TORCH_CHECK(input.is_contiguous());
   int8_t* a = (int8_t*)input.data_ptr();
   int start_addr = addr;
@@ -30,6 +34,15 @@ void write_mem(TorchDeviceHandle handle, int64_t hid, int64_t addr, int64_t word
     }
     start_addr++;
   }
+}
+
+torch::Tensor read_mem(TorchDeviceHandle handle,
+                       int64_t hid,
+                       int64_t addr,
+                       int64_t wordsize,
+                       int64_t numel) {
+    torch::Tensor tensor = torch::ones(numel);
+    return tensor;
 }
 
 void reset(TorchDeviceHandle handle, int64_t cycles) {
@@ -50,6 +63,8 @@ std::vector<torch::RegisterOperators> register_device_api() {
         torch::RegisterOperators().op("device::read_reg", &read_reg));
     registeredOps.push_back(
         torch::RegisterOperators().op("device::write_reg", &write_reg));
+    registeredOps.push_back(
+        torch::RegisterOperators().op("device::read_mem", &read_mem));
     registeredOps.push_back(
         torch::RegisterOperators().op("device::write_mem", &write_mem));
     registeredOps.push_back(
