@@ -4,44 +4,90 @@ module __Relu_dpi;
 
     export "DPI-C" function dpi_read_reg;
     export "DPI-C" function dpi_write_reg;
+    export "DPI-C" function dpi_read_mem;
+    export "DPI-C" function dpi_write_mem;
 
-    function byte dpi_read_a;
+    function byte dpi_read_reg_raddr;
         input int sel;
-        reg [8-1:0] data;
+        reg [16-1:0] data;
         begin
-            data = __Relu.dut.a;
+            data = __Relu.dut.raddr;
             return data[sel*8 +: 8];
         end
     endfunction
 
-    function void dpi_write_a;
+    function void dpi_write_reg_raddr;
         input int sel;
         input byte value;
-        reg [8-1:0] data;
+        reg [16-1:0] data;
         begin
-            data = __Relu.dut.a;
+            data = __Relu.dut.raddr;
             data[sel*8 +: 8] = value;
-            __Relu.dut.a = data;
+            __Relu.dut.raddr = data;
         end
     endfunction
 
-    function byte dpi_read_y;
+    function byte dpi_read_reg_waddr;
         input int sel;
-        reg [8-1:0] data;
+        reg [16-1:0] data;
         begin
-            data = __Relu.dut.y;
+            data = __Relu.dut.waddr;
             return data[sel*8 +: 8];
         end
     endfunction
 
-    function void dpi_write_y;
+    function void dpi_write_reg_waddr;
+        input int sel;
+        input byte value;
+        reg [16-1:0] data;
+        begin
+            data = __Relu.dut.waddr;
+            data[sel*8 +: 8] = value;
+            __Relu.dut.waddr = data;
+        end
+    endfunction
+
+    function byte dpi_read_mem_rmem;
+        input int addr;
+        input int sel;
+        reg [8-1:0] data;
+        begin
+        data = __Relu.dut.rmem[addr];
+        return data[sel*8 +: 8];
+        end
+    endfunction
+
+    function void dpi_write_mem_rmem;
+        input int addr;
         input int sel;
         input byte value;
         reg [8-1:0] data;
         begin
-            data = __Relu.dut.y;
+        data = __Relu.dut.rmem[addr];
+        data[sel*8 +: 8] = value;
+        __Relu.dut.rmem[addr] = data;
+        end
+    endfunction
+
+    function byte dpi_read_mem_wmem;
+        input int addr;
+        input int sel;
+        reg [8-1:0] data;
+        begin
+            data = __Relu.dut.wmem[addr];
+            return data[sel*8 +: 8];
+        end
+    endfunction
+
+    function void dpi_write_mem_wmem;
+        input int addr;
+        input int sel;
+        input byte value;
+        reg [8-1:0] data;
+        begin
+            data = __Relu.dut.wmem[addr];
             data[sel*8 +: 8] = value;
-            __Relu.dut.y = data;
+            __Relu.dut.wmem[addr] = data;
         end
     endfunction
 
@@ -50,10 +96,10 @@ module __Relu_dpi;
         input int sel;
         begin
             if (hid == 0) begin
-                return dpi_read_a(sel);
+                return dpi_read_reg_raddr(sel);
             end
             else if (hid == 1) begin
-                return dpi_read_y(sel);
+                return dpi_read_reg_waddr(sel);
             end
             else begin
                 $error("[dpi-read-reg] invalid hid");
@@ -67,15 +113,50 @@ module __Relu_dpi;
         input byte value;
         begin
             if (hid == 0) begin
-                dpi_write_a(sel, value);
+                dpi_write_reg_raddr(sel, value);
             end
             else if (hid == 1) begin
-                dpi_write_y(sel, value);
+                dpi_write_reg_waddr(sel, value);
             end
             else begin
                 $error("[dpi-write-reg] invalid hid");
             end
         end
     endfunction
+
+    function byte dpi_read_mem;
+        input int id;
+        input int addr;
+        input int sel;
+        begin
+            if (id == 0) begin
+                return dpi_read_mem_rmem(addr, sel);
+            end
+            else if (id == 1) begin
+                return dpi_read_mem_wmem(addr, sel);
+            end
+            else begin
+                $error("[dpi-read-mem] invalid hid");
+            end
+        end
+    endfunction
+
+  function void dpi_write_mem;
+        input int id;
+        input int addr;
+        input int sel;
+        input byte value;
+        begin
+            if (id == 0) begin
+                dpi_write_mem_rmem(addr, sel, value);
+            end
+            else if (id == 1) begin
+                dpi_write_mem_wmem(addr, sel, value);
+            end
+            else begin
+                $error("[dpi-write-mem] invalid hid");
+            end
+        end
+  endfunction
 
 endmodule
