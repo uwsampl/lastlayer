@@ -6,6 +6,7 @@ run: build/librelu.so
 build/librelu.so: verilog/Relu.v
 	cargo run --bin pytorch_relu
 
+chisel: verilog/Relu.v
 verilog/Relu.v:
 	cd chisel && sbt 'runMain relu.Relu --target-dir ../verilog'
 
