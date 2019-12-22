@@ -4,12 +4,12 @@ from device import Device
 dev = Device("build/libadder.so") # lastlayer generated
 dev.reset(10) # reset for 10 cycles
 
-N = 16
-MAX = 64
+n = 16
+maxv = 64
 
-a = np.random.randint(MAX, size=N, dtype="uint8")
-b = np.random.randint(MAX, size=N, dtype="uint8")
-c = np.zeros(N, dtype="uint8")
+a = np.random.randint(maxv, size=n, dtype="uint8")
+b = np.random.randint(maxv, size=n, dtype="uint8")
+c = np.zeros(n, dtype="uint8")
 
 for i, d in enumerate(zip(a, b)):
     dev.write_reg(0, d[0]) # hid=0
