@@ -2,10 +2,15 @@ import numpy as np
 import torch
 from device import Device
 
+N = 8
+MIN = -64
+MAX = 64
+
 dev = Device("build/librelu.so")
-x = torch.tensor(np.array([[1, 2, 3], [4, 5, 6]]), dtype=torch.int8)
-print(x)
-dev.write_mem(0, 0, 1, x)
+np_x = np.random.randint(MIN, MAX, size=N, dtype="int8")
+torch_x = torch.tensor(np_x, dtype=torch.int8)
+print(torch_x)
+dev.write_mem(0, 0, 1, torch_x)
 # dev.reset(10)
 # dev.write_reg(0, 0, -3)
 # dev.run(20)
