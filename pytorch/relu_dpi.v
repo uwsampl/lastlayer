@@ -125,14 +125,14 @@ module __Relu_dpi;
     endfunction
 
     function byte dpi_read_mem;
-        input int id;
+        input int hid;
         input int addr;
         input int sel;
         begin
-            if (id == 0) begin
+            if (hid == 0) begin
                 return dpi_read_mem_rmem(addr, sel);
             end
-            else if (id == 1) begin
+            else if (hid == 1) begin
                 return dpi_read_mem_wmem(addr, sel);
             end
             else begin
@@ -141,16 +141,16 @@ module __Relu_dpi;
         end
     endfunction
 
-  function void dpi_write_mem;
-        input int id;
+    function void dpi_write_mem;
+        input int hid;
         input int addr;
         input int sel;
         input byte value;
         begin
-            if (id == 0) begin
+            if (hid == 0) begin
                 dpi_write_mem_rmem(addr, sel, value);
             end
-            else if (id == 1) begin
+            else if (hid == 1) begin
                 dpi_write_mem_wmem(addr, sel, value);
             end
             else begin

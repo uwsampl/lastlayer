@@ -4,6 +4,8 @@ module __adder_dpi;
 
     export "DPI-C" function dpi_read_reg;
     export "DPI-C" function dpi_write_reg;
+    export "DPI-C" function dpi_read_mem;
+    export "DPI-C" function dpi_write_mem;
 
     function byte dpi_read_a;
         input int sel;
@@ -103,5 +105,24 @@ module __adder_dpi;
             end
         end
     endfunction
+
+    function byte dpi_read_mem;
+        input int hid;
+        input int addr;
+        input int sel;
+        begin
+            $error("[dpi-read-mem] invalid hid");
+        end
+    endfunction
+
+    function void dpi_write_mem;
+        input int hid;
+        input int addr;
+        input int sel;
+        input byte value;
+        begin
+            $error("[dpi-write-mem] invalid hid");
+        end
+  endfunction
 
 endmodule
