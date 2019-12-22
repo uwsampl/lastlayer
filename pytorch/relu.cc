@@ -41,7 +41,7 @@ torch::Tensor read_mem(TorchDeviceHandle handle,
                        int64_t addr,
                        int64_t wordsize,
                        int64_t numel) {
-    torch::Tensor tensor = torch::ones(numel);
+    torch::Tensor tensor = torch::ones(numel, torch::kInt8);
     return tensor;
 }
 
