@@ -7,91 +7,91 @@ module __Relu_dpi;
     export "DPI-C" function dpi_read_mem;
     export "DPI-C" function dpi_write_mem;
 
-    function byte dpi_read_reg_raddr;
+    function int dpi_read_reg_raddr;
         input int sel;
-        reg [16-1:0] data;
+        reg [32-1:0] data;
         begin
             data[0 +: 10] = __Relu.dut.raddr;
-            return data[sel*8 +: 8];
+            return data[sel*32 +: 32];
         end
     endfunction
 
     function void dpi_write_reg_raddr;
         input int sel;
-        input byte value;
-        reg [16-1:0] data;
+        input int value;
+        reg [32-1:0] data;
         begin
             data[0 +: 10] = __Relu.dut.raddr;
-            data[sel*8 +: 8] = value;
+            data[sel*32 +: 32] = value;
             __Relu.dut.raddr = data[0 +: 10];
         end
     endfunction
 
-    function byte dpi_read_reg_waddr;
+    function int dpi_read_reg_waddr;
         input int sel;
-        reg [16-1:0] data;
+        reg [32-1:0] data;
         begin
             data[0 +: 10] = __Relu.dut.waddr;
-            return data[sel*8 +: 8];
+            return data[sel*32 +: 32];
         end
     endfunction
 
     function void dpi_write_reg_waddr;
         input int sel;
-        input byte value;
-        reg [16-1:0] data;
+        input int value;
+        reg [32-1:0] data;
         begin
             data[0 +: 10] = __Relu.dut.waddr;
-            data[sel*8 +: 8] = value;
+            data[sel*32 +: 32] = value;
             __Relu.dut.waddr = data[0 +: 10];
         end
     endfunction
 
-    function byte dpi_read_mem_rmem;
+    function int dpi_read_mem_rmem;
         input int addr;
         input int sel;
-        reg [8-1:0] data;
+        reg [32-1:0] data;
         begin
         data[0 +: 8] = __Relu.dut.rmem[addr];
-        return data[sel*8 +: 8];
+        return data[sel*32 +: 32];
         end
     endfunction
 
     function void dpi_write_mem_rmem;
         input int addr;
         input int sel;
-        input byte value;
-        reg [8-1:0] data;
+        input int value;
+        reg [32-1:0] data;
         begin
         data[0 +: 8] = __Relu.dut.rmem[addr];
-        data[sel*8 +: 8] = value;
+        data[sel*32 +: 32] = value;
         __Relu.dut.rmem[addr] = data[0 +: 8];
         end
     endfunction
 
-    function byte dpi_read_mem_wmem;
+    function int dpi_read_mem_wmem;
         input int addr;
         input int sel;
-        reg [8-1:0] data;
+        reg [32-1:0] data;
         begin
             data[0 +: 8] = __Relu.dut.wmem[addr];
-            return data[sel*8 +: 8];
+            return data[sel*32 +: 32];
         end
     endfunction
 
     function void dpi_write_mem_wmem;
         input int addr;
         input int sel;
-        input byte value;
-        reg [8-1:0] data;
+        input int value;
+        reg [32-1:0] data;
         begin
             data[0 +: 8] = __Relu.dut.wmem[addr];
-            data[sel*8 +: 8] = value;
+            data[sel*32 +: 32] = value;
             __Relu.dut.wmem[addr] = data[0 +: 8];
         end
     endfunction
 
-    function byte dpi_read_reg;
+    function int dpi_read_reg;
         input int hid;
         input int sel;
         begin
@@ -110,7 +110,7 @@ module __Relu_dpi;
     function void dpi_write_reg;
         input int hid;
         input int sel;
-        input byte value;
+        input int value;
         begin
             if (hid == 0) begin
                 dpi_write_reg_raddr(sel, value);
@@ -124,7 +124,7 @@ module __Relu_dpi;
         end
     endfunction
 
-    function byte dpi_read_mem;
+    function int dpi_read_mem;
         input int hid;
         input int addr;
         input int sel;
@@ -145,7 +145,7 @@ module __Relu_dpi;
         input int hid;
         input int addr;
         input int sel;
-        input byte value;
+        input int value;
         begin
             if (hid == 0) begin
                 dpi_write_mem_rmem(addr, sel, value);
