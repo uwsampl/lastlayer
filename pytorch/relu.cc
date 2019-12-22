@@ -17,14 +17,18 @@ int64_t read_reg(TorchDeviceHandle handle, int64_t hid, int64_t sel) {
 }
 
 void write_reg(TorchDeviceHandle handle, int64_t hid, int64_t sel, int64_t value) {
-    return LastLayerWriteReg(reinterpret_cast<LastLayerHandle>(handle), hid, sel, value);
+    LastLayerWriteReg(reinterpret_cast<LastLayerHandle>(handle), hid, sel, value);
 }
 
-void write_mem(TorchDeviceHandle handle, int64_t hid, int64_t wordsize, torch::Tensor input) {
+void write_mem(TorchDeviceHandle handle, int64_t hid, int64_t addr, int64_t wordsize, torch::Tensor input) {
   TORCH_CHECK(input.is_contiguous());
   int8_t* a = (int8_t*)input.data_ptr();
-  for (int i = 0; i < input.numel(); ++i) {
-    printf("i:%d value:%d\n", i, *a++);
+  int start_addr = addr;
+  for (int i = 0; i < input.numel(); i = i + wordsize) {
+    for (int j = 0; j < wordsize; j++) {
+        LastLayerWriteMem(reinterpret_cast<LastLayerHandle>(handle), hid, start_addr, j, *a++);
+    }
+    start_addr++;
   }
 }
 

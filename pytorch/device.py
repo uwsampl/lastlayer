@@ -10,8 +10,8 @@ class Device:
         return torch.ops.device.read_reg(self.handle, hid, sel)
     def write_reg(self, hid, sel, value):
         torch.ops.device.write_reg(self.handle, hid, sel, value)
-    def write_mem(self, hid, wordsize, input):
-        torch.ops.device.write_mem(self.handle, hid, wordsize, input)
+    def write_mem(self, hid, addr, wordsize, input):
+        torch.ops.device.write_mem(self.handle, hid, addr, wordsize, input)
     def reset(self, cycles):
         torch.ops.device.reset(self.handle, cycles)
     def run(self, cycles):
