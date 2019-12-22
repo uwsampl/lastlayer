@@ -18,38 +18,38 @@ void LastLayerDealloc(LastLayerHandle handle) {
     delete static_cast<V{{vtop}}*>(handle);
 }
 
-char LastLayerReadReg(LastLayerHandle handle, int hid, int sel) {
+int LastLayerReadReg(LastLayerHandle handle, int hid, int sel) {
     assert( handle != nullptr );
     svSetScope(svGetScopeFromName("TOP.{{vtop}}.dpi"));
     return dpi_read_reg(hid, sel);
 }
 
-void LastLayerWriteReg(LastLayerHandle handle, int hid, int sel, char value) {
+void LastLayerWriteReg(LastLayerHandle handle, int hid, int sel, int value) {
     assert( handle != nullptr );
     svSetScope(svGetScopeFromName("TOP.{{vtop}}.dpi"));
     dpi_write_reg(hid, sel, value);
 }
 
-char LastLayerReadMem(LastLayerHandle handle, int hid, int addr, int sel) {
+int LastLayerReadMem(LastLayerHandle handle, int hid, int addr, int sel) {
     assert( handle != nullptr );
     svSetScope(svGetScopeFromName("TOP.{{vtop}}.dpi"));
     return dpi_read_mem(hid, addr, sel);
 }
 
-void LastLayerWriteMem(LastLayerHandle handle, int hid, int addr, int sel, char value) {
+void LastLayerWriteMem(LastLayerHandle handle, int hid, int addr, int sel, int value) {
     assert( handle != nullptr );
     svSetScope(svGetScopeFromName("TOP.{{vtop}}.dpi"));
     dpi_write_mem(hid, addr, sel, value);
 }
 
-void LastLayerReset(LastLayerHandle handle, int cycles) {
+void LastLayerReset(LastLayerHandle handle, int n) {
     V{{vtop}}* top = static_cast<V{{vtop}}*>(handle);
     top->{{clock}} = 0;
     top->{{reset}} = 1;
     if (main_time > 0) {
         main_time = 0;
     }
-    while (!Verilated::gotFinish() && main_time < static_cast<vluint64_t>(cycles*10)) {
+    while (!Verilated::gotFinish() && main_time < static_cast<vluint64_t>(n*10)) {
         if ((main_time % 10) == 1) {
             top->{{clock}} = 1;
         }
@@ -63,13 +63,13 @@ void LastLayerReset(LastLayerHandle handle, int cycles) {
 }
 
 
-void LastLayerRun(LastLayerHandle handle, int cycles) {
+void LastLayerRun(LastLayerHandle handle, int n) {
   V{{vtop}}* top = static_cast<V{{vtop}}*>(handle);
   top->{{clock}} = 0;
   if (main_time > 0) {
       main_time = 0;
   }
-  while (!Verilated::gotFinish() && main_time < static_cast<vluint64_t>(cycles*10)) {
+  while (!Verilated::gotFinish() && main_time < static_cast<vluint64_t>(n*10)) {
       if ((main_time % 10) == 1) {
           top->{{clock}} = 1;
       }

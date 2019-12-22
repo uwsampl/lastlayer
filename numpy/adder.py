@@ -11,11 +11,12 @@ a = np.random.randint(maxv, size=n, dtype="uint8")
 b = np.random.randint(maxv, size=n, dtype="uint8")
 c = np.zeros(n, dtype="uint8")
 
+# [hardware op] y = a + b
 for i, d in enumerate(zip(a, b)):
-    dev.write_reg(0, d[0]) # hid=0
-    dev.write_reg(1, d[1]) # hid=1
+    dev.write_reg_a(d[0])
+    dev.write_reg_b(d[1])
     dev.run(3) # run for 3 cycles
-    c[i] = dev.read_reg(2) # hid=2
+    c[i] = dev.read_reg_y()
 
 y = np.add(a, b)
 np.testing.assert_array_equal(c, y)

@@ -7,67 +7,67 @@ module __adder_dpi;
     export "DPI-C" function dpi_read_mem;
     export "DPI-C" function dpi_write_mem;
 
-    function byte dpi_read_a;
+    function int dpi_read_a;
         input int sel;
-        reg [8-1:0] data;
+        reg [32-1:0] data;
         begin
-            data = __adder.dut.a;
-            return data[sel*8 +: 8];
+            data[0 +: 8] = __adder.dut.a;
+            return data[sel*32 +: 32];
         end
     endfunction
 
     function void dpi_write_a;
         input int sel;
-        input byte value;
-        reg [8-1:0] data;
+        input int value;
+        reg [32-1:0] data;
         begin
-            data = __adder.dut.a;
-            data[sel*8 +: 8] = value;
-            __adder.dut.a = data;
+            data[0 +: 8] = __adder.dut.a;
+            data[sel*32 +: 32] = value;
+            __adder.dut.a = data[0 +: 8];
         end
     endfunction
 
-    function byte dpi_read_b;
+    function int dpi_read_b;
         input int sel;
-        reg [8-1:0] data;
+        reg [32-1:0] data;
         begin
-            data = __adder.dut.b;
-            return data[sel*8 +: 8];
+            data[0 +: 8] = __adder.dut.b;
+            return data[sel*32 +: 32];
         end
     endfunction
 
     function void dpi_write_b;
         input int sel;
-        input byte value;
-        reg [8-1:0] data;
+        input int value;
+        reg [32-1:0] data;
         begin
-            data = __adder.dut.b;
-            data[sel*8 +: 8] = value;
-            __adder.dut.b = data;
+            data[0 +: 8] = __adder.dut.b;
+            data[sel*32 +: 32] = value;
+            __adder.dut.b = data[0 +: 8];
         end
     endfunction
 
-    function byte dpi_read_y;
+    function int dpi_read_y;
         input int sel;
-        reg [8-1:0] data;
+        reg [32-1:0] data;
         begin
-            data = __adder.dut.y;
-            return data[sel*8 +: 8];
+            data[0 +: 8] = __adder.dut.y;
+            return data[sel*32 +: 32];
         end
     endfunction
 
     function void dpi_write_y;
         input int sel;
-        input byte value;
-        reg [8-1:0] data;
+        input int value;
+        reg [32-1:0] data;
         begin
-            data = __adder.dut.y;
-            data[sel*8 +: 8] = value;
-            __adder.dut.y = data;
+            data[0 +: 8] = __adder.dut.y;
+            data[sel*32 +: 32] = value;
+            __adder.dut.y = data[0 +: 8];
         end
     endfunction
 
-    function byte dpi_read_reg;
+    function int dpi_read_reg;
         input int hid;
         input int sel;
         begin
@@ -89,7 +89,7 @@ module __adder_dpi;
     function void dpi_write_reg;
         input int hid;
         input int sel;
-        input byte value;
+        input int value;
         begin
             if (hid == 0) begin
                 dpi_write_a(sel, value);

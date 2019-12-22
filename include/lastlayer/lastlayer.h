@@ -2,19 +2,35 @@
 extern "C" {
 #endif
 
+/* handle */
 typedef void* LastLayerHandle;
 
+/* allocate */
 LastLayerHandle LastLayerAlloc();
+
+/* deallocate */
 void LastLayerDealloc(LastLayerHandle handle);
 
-char LastLayerReadReg(LastLayerHandle handle, int hid, int sel);
-void LastLayerWriteReg(LastLayerHandle handle, int hid, int sel, char value);
+/* read a register */
+int LastLayerReadReg(LastLayerHandle handle, int hid, int sel);
 
-char LastLayerReadMem(LastLayerHandle handle, int hid, int addr, int sel);
-void LastLayerWriteMem(LastLayerHandle handle, int hid, int addr, int sel, char value);
+/* write a register */
+void LastLayerWriteReg(LastLayerHandle handle,
+    int hid, int sel, int value);
 
-void LastLayerReset(LastLayerHandle handle, int cycles);
-void LastLayerRun(LastLayerHandle handle, int cycles);
+/* read a memory */
+int LastLayerReadMem(LastLayerHandle handle,
+    int hid, int addr, int sel);
+
+/* write a memory */
+void LastLayerWriteMem(LastLayerHandle handle,
+    int hid, int addr, int sel, int value);
+
+/* reset for n clock cycles */
+void LastLayerReset(LastLayerHandle handle, int n);
+
+/* run for n clock cycles */
+void LastLayerRun(LastLayerHandle handle, int n);
 
 #ifdef __cplusplus
 }
