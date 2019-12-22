@@ -145,7 +145,6 @@ impl Build {
     fn default_verilog_warning(&mut self) -> &mut Build {
         self.verilog_disable_warning("BLKANDNBLK");
         self.verilog_disable_warning("PINMISSING");
-        self.verilog_disable_warning("WIDTH");
         self
     }
 
