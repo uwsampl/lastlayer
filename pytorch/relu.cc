@@ -22,34 +22,34 @@ void write_reg(TorchDeviceHandle handle, int64_t hid, int64_t sel, int64_t value
 
 void write_mem(TorchDeviceHandle handle,
                int64_t hid,
-               int64_t addr,
-               int64_t wordsize,
+               int64_t start_addr,
+               int64_t word_size,
                torch::Tensor input) {
   TORCH_CHECK(input.is_contiguous());
   int8_t* a = (int8_t*)input.data_ptr();
-  int start_addr = addr;
-  for (int i = 0; i < input.numel(); i = i + wordsize) {
-    for (int j = 0; j < wordsize; j++) {
-        LastLayerWriteMem(reinterpret_cast<LastLayerHandle>(handle), hid, start_addr, j, *a++);
+  int saddr = start_addr;
+  for (int i = 0; i < input.numel(); i = i + word_size) {
+    for (int j = 0; j < word_size; j++) {
+        LastLayerWriteMem(reinterpret_cast<LastLayerHandle>(handle), hid, saddr, j, *a++);
     }
-    start_addr++;
+    saddr++;
   }
 }
 
 torch::Tensor read_mem(TorchDeviceHandle handle,
                        int64_t hid,
-                       int64_t addr,
-                       int64_t wordsize,
+                       int64_t start_addr,
+                       int64_t word_size,
                        int64_t numel) {
     torch::Tensor output = torch::ones(numel, torch::kInt8);
     TORCH_CHECK(output.is_contiguous());
     int8_t* a = (int8_t*)output.data_ptr();
-    int start_addr = addr;
-    for (int i = 0; i < numel; i = i + wordsize) {
-        for (int j = 0; j < wordsize; j++) {
-            *a++ = LastLayerReadMem(reinterpret_cast<LastLayerHandle>(handle), hid, start_addr, j);
+    int saddr = start_addr;
+    for (int i = 0; i < numel; i = i + word_size) {
+        for (int j = 0; j < word_size; j++) {
+            *a++ = LastLayerReadMem(reinterpret_cast<LastLayerHandle>(handle), hid, saddr, j);
         }
-        start_addr++;
+        saddr++;
     }
     return output;
 }

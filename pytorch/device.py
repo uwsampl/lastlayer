@@ -4,17 +4,30 @@ class Device:
     def __init__(self, lib):
         torch.ops.load_library(lib)
         self.handle = torch.ops.device.alloc()
-        self.wordsize = 1
+        self.word_size = 1
+        self.sel = 0  # select byte-0
+        self.raddr_hid = 0
+        self.waddr_hid = 1
+        self.rmem_hid = 0
+        self.wmem_hid = 1
     def __del__(self):
         torch.ops.device.dealloc(self.handle)
-    def read_reg(self, hid, sel):
-        return torch.ops.device.read_reg(self.handle, hid, sel)
-    def write_reg(self, hid, sel, value):
-        torch.ops.device.write_reg(self.handle, hid, sel, value)
-    def read_mem(self, hid, addr, numel):
-        return torch.ops.device.read_mem(self.handle, hid, addr, self.wordsize, numel)
-    def write_mem(self, hid, addr, input):
-        torch.ops.device.write_mem(self.handle, hid, addr, self.wordsize, input)
+    def read_raddr(self):
+        return torch.ops.device.read_reg(self.handle, self.raddr_hid, self.sel)
+    def write_raddr(self, value):
+        torch.ops.device.write_reg(self.handle, self.raddr_hid, self.sel, value)
+    def read_waddr(self):
+        return torch.ops.device.read_reg(self.handle, self.waddr_hid, self.sel)
+    def write_waddr(self, value):
+        torch.ops.device.write_reg(self.handle, self.waddr_hid, self.sel, value)
+    def read_rmem(self, start_addr, numel):
+        return torch.ops.device.read_mem(self.handle, self.rmem_hid, start_addr, self.word_size, numel)
+    def write_rmem(self, start_addr, input):
+        torch.ops.device.write_mem(self.handle, self.rmem_hid, start_addr, self.word_size, input)
+    def read_wmem(self, start_addr, numel):
+        return torch.ops.device.read_mem(self.handle, self.wmem_hid, start_addr, self.word_size, numel)
+    def write_wmem(self, start_addr, input):
+        torch.ops.device.write_mem(self.handle, self.wmem_hid, start_addr, self.word_size, input)
     def reset(self, cycles):
         torch.ops.device.reset(self.handle, cycles)
     def run(self, cycles):
