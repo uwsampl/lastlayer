@@ -1,8 +1,8 @@
+use os_info;
 use std::env::{current_dir, set_current_dir};
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 use std::process::Command;
-use os_info;
 
 fn run_cmd(cmd: &mut Command) {
     println!("running {:?}", cmd);
@@ -184,17 +184,18 @@ mod miniconda {
 
     #[derive(Clone, Debug)]
     pub struct Build {
-        version: Option<String>,
         root_dir: Option<PathBuf>,
+        miniconda_version: Option<String>,
         miniconda_dir: Option<PathBuf>,
-        miniconda_name: String,
+        miniconda_name: Option<String>,
+        pytorch_version: Option<String>,
     }
 
     impl Build {
-        fn get_version(&self) -> String {
-            match &self.version {
+        fn get_miniconda_version(&self) -> String {
+            match &self.miniconda_version {
                 Some(s) => s.to_string(),
-                None => panic!("version not defined"),
+                None => panic!("miniconda version not defined"),
             }
         }
 
@@ -202,6 +203,20 @@ mod miniconda {
             match &self.miniconda_dir {
                 Some(d) => d.to_path_buf(),
                 None => panic!("miniconda dir not defined"),
+            }
+        }
+
+        fn get_miniconda_name(&self) -> String {
+            match &self.miniconda_name {
+                Some(s) => s.to_string(),
+                None => panic!("miniconda name not defined"),
+            }
+        }
+
+        fn get_pytorch_version(&self) -> String {
+            match &self.pytorch_version {
+                Some(s) => s.to_string(),
+                None => panic!("pytorch version not defined"),
             }
         }
 
@@ -221,7 +236,7 @@ mod miniconda {
                 _ => "Linux-x86_64".to_string(),
             };
             let dir = self.get_miniconda_dir();
-            let script = format!("Miniconda{}-{}.sh", self.get_version(), platform);
+            let script = format!("Miniconda{}-{}.sh", self.get_miniconda_version(), platform);
             let url = format!("https://repo.continuum.io/miniconda/{}", script);
             let mut cmd = Command::new("wget");
             cmd.arg(url).arg("-O").arg(&dir.join("miniconda.sh"));
@@ -238,20 +253,31 @@ mod miniconda {
         fn run_miniconda_sh(&self) {
             let dir = self.get_miniconda_dir();
             let mut cmd = Command::new(&dir.join("miniconda.sh"));
-            cmd.arg("-b").arg("-p").arg(&dir.join(&self.miniconda_name));
+            cmd.arg("-b")
+                .arg("-p")
+                .arg(&dir.join(self.get_miniconda_name()));
             run_cmd(&mut cmd);
         }
 
         fn install_pytorch(&self) {
             let m_dir = self.get_miniconda_dir();
-            let i_dir = m_dir.join(&self.miniconda_name);
+            let i_dir = m_dir.join(self.get_miniconda_name());
             let mut cmd = Command::new(&i_dir.join("bin/conda"));
-            cmd.arg("install").arg("-y").arg("pytorch");
+            cmd.arg("install")
+                .arg("-y")
+                .arg(&format!("pytorch=={}", self.get_pytorch_version()))
+                .arg("-c")
+                .arg("pytorch");
             run_cmd(&mut cmd);
         }
 
-        pub fn version(&mut self, ver: &str) -> &mut Build {
-            self.version = Some(ver.to_string());
+        pub fn miniconda_version(&mut self, ver: &str) -> &mut Build {
+            self.miniconda_version = Some(ver.to_string());
+            self
+        }
+
+        pub fn pytorch_version(&mut self, ver: &str) -> &mut Build {
+            self.pytorch_version = Some(ver.to_string());
             self
         }
 
@@ -265,19 +291,25 @@ mod miniconda {
             self
         }
 
+        pub fn miniconda_name(&mut self, name: &str) -> &mut Build {
+            self.miniconda_name = Some(name.to_string());
+            self
+        }
+
         pub fn new() -> Build {
             Build {
-                version: None,
                 root_dir: None,
+                miniconda_version: None,
                 miniconda_dir: None,
-                miniconda_name: "local".to_string(),
+                miniconda_name: None,
+                pytorch_version: None,
             }
         }
 
         pub fn install(&self) {
             let dir = self.get_miniconda_dir();
             self.create_miniconda_dir();
-            if !&dir.join(&self.miniconda_name).exists() {
+            if !&dir.join(self.get_miniconda_name()).exists() {
                 self.wget_miniconda_sh();
                 self.chmod_miniconda_sh();
                 self.run_miniconda_sh();
@@ -300,8 +332,10 @@ fn main() {
         .build_dir(&verilator_build_dir)
         .compile();
     miniconda::Build::new()
-        .version("3-4.7.12.1")
         .root_dir(&root_dir)
+        .miniconda_version("3-4.7.12.1")
         .miniconda_dir(&miniconda_dir)
+        .miniconda_name("local")
+        .pytorch_version("1.3.1")
         .install();
 }
