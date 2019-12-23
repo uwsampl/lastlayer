@@ -52,10 +52,27 @@ class Relu(implicit config: ReluConfig) extends Module {
   val vop = Module(new VecOp)
   val rmem = SyncReadMem(config.memDepth, UInt(config.memDataWidth.W))
   val wmem = SyncReadMem(config.memDepth, UInt(config.memDataWidth.W))
+  val active = RegInit(false.B)
+  val idle = RegInit(false.B)
+  val cycle = RegInit(0.U(config.counterWidth.W))
+  val numop = RegInit(0.U(config.memAddrWidth.W))
+  val length = RegInit(0.U(config.memAddrWidth.W))
   val raddr = RegInit(0.U(config.memAddrWidth.W))
   val waddr = RegInit(0.U(config.memAddrWidth.W))
 
-  vop.io.in := rmem.read(raddr, true.B)
+  when (active && !idle) {
+    raddr := raddr + 1.U
+    waddr := waddr + 1.U
+    cycle := cycle + 1.U
+    numop := numop + config.xLen.U
+  }
+
+  when (numop === length) {
+    idle := true.B
+    active := false.B
+  }
+
+  vop.io.in := rmem.read(raddr, active)
   wmem.write(waddr, vop.io.out)
 
   // this prevents rmem to be removed
@@ -67,8 +84,9 @@ class Relu(implicit config: ReluConfig) extends Module {
   io.rdata := wmem.read(io.raddr, io.ren)
 
   // do not remove these registers
-  dontTouch(raddr)
-  dontTouch(waddr)
+  dontTouch(active)
+  dontTouch(length)
+  dontTouch(cycle)
 }
 
 object Relu extends App {
