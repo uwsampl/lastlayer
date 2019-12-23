@@ -7,31 +7,35 @@ n = 16384
 minv = -64
 maxv = 64
 max_cycle = 1000000
+num_vec_words = 2
 
-nx = np.random.randint(minv, maxv, size=n, dtype="int8")
-tx = torch.tensor(nx, dtype=torch.int8)
+a = np.random.randint(minv, maxv, size=n, dtype="int8")
+x = torch.tensor(a, dtype=torch.int8)
 
-dev = Device("build/librelu.so")
+dev = Device("build/librelu.so", n, num_vec_words)
 dev.reset(3)
-dev.set_raddr(0)
-dev.set_waddr(0)
-dev.set_length(n)
-dev.write_mem(0, tx)
+dev.set_raddr()
+dev.set_waddr()
+dev.set_length()
+dev.write_mem(x)
 dev.launch()
-t1_start = perf_counter_ns()
+start = perf_counter_ns()
 dev.run(max_cycle)
-t1_stop = perf_counter_ns()
+stop = perf_counter_ns()
 finish = dev.finish()
-tz = tx.clamp(min=0)
+z = x.clamp(min=0)
 
 if finish:
-    ty = dev.read_mem(0, n)
+    y = dev.read_mem(n)
     cycle_counter = dev.get_cycle_counter()
-    if torch.all(torch.eq(ty, tz)):
+    if torch.all(torch.eq(y, z)):
         print("status: PASS")
         print("cycles:", cycle_counter)
-        print("Time:", t1_stop-t1_start)
+        print("Time:", stop-start)
     else:
         print("status: FAIL")
+        print("input:", x)
+        print("output:", y)
+
 else:
     print("Still not finished in {} cycles".format(cycle_counter))

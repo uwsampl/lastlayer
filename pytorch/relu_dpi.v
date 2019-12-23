@@ -136,9 +136,9 @@ module __Relu_dpi;
     function int dpi_read_mem_rmem;
         input int addr;
         input int sel;
-        reg [32-1:0] data;
+        reg [64-1:0] data;
         begin
-        data[0 +: 8] = __Relu.dut.rmem[addr];
+        data[0 +: 64] = __Relu.dut.rmem[addr];
         return data[sel*32 +: 32];
         end
     endfunction
@@ -147,20 +147,20 @@ module __Relu_dpi;
         input int addr;
         input int sel;
         input int value;
-        reg [32-1:0] data;
+        reg [64-1:0] data;
         begin
-        data[0 +: 8] = __Relu.dut.rmem[addr];
+        data[0 +: 64] = __Relu.dut.rmem[addr];
         data[sel*32 +: 32] = value;
-        __Relu.dut.rmem[addr] = data[0 +: 8];
+        __Relu.dut.rmem[addr] = data[0 +: 64];
         end
     endfunction
 
     function int dpi_read_mem_wmem;
         input int addr;
         input int sel;
-        reg [32-1:0] data;
+        reg [64-1:0] data;
         begin
-            data[0 +: 8] = __Relu.dut.wmem[addr];
+            data[0 +: 64] = __Relu.dut.wmem[addr];
             return data[sel*32 +: 32];
         end
     endfunction
@@ -169,11 +169,11 @@ module __Relu_dpi;
         input int addr;
         input int sel;
         input int value;
-        reg [32-1:0] data;
+        reg [64-1:0] data;
         begin
-            data[0 +: 8] = __Relu.dut.wmem[addr];
+            data[0 +: 64] = __Relu.dut.wmem[addr];
             data[sel*32 +: 32] = value;
-            __Relu.dut.wmem[addr] = data[0 +: 8];
+            __Relu.dut.wmem[addr] = data[0 +: 64];
         end
     endfunction
 

@@ -4,9 +4,11 @@ import chisel3._
 import chisel3.util._
 
 case class ReluConfig() {
-  val xLen = 1
+  val numVecWords = 2
+  val vecWordBytes = 4
   val opDataWidth = 8
   val memDepth = 65536
+  val xLen = vecWordBytes * numVecWords
   val memDataWidth = xLen * opDataWidth
   val memAddrWidth = log2Ceil(memDepth)
   val cycleCounterWidth = 32

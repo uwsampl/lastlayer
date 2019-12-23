@@ -2,6 +2,9 @@
 #include <vector>
 #include "lastlayer.h"
 
+// unlikely to change, used in write_mem and read_mem
+#define WORD_BYTES 4
+
 typedef int64_t TorchDeviceHandle;
 
 TorchDeviceHandle alloc() {
@@ -26,11 +29,17 @@ void write_mem(TorchDeviceHandle handle,
                int64_t num_word,
                torch::Tensor input) {
   TORCH_CHECK(input.is_contiguous());
+  TORCH_CHECK(input.numel() >= WORD_BYTES && input.numel() % WORD_BYTES == 0)
   int8_t* a = (int8_t*)input.data_ptr();
-  int saddr = start_addr;
-  for (int i = 0; i < input.numel(); i = i + num_word) {
-    for (int j = 0; j < num_word; j++) {
-        LastLayerWriteMem(reinterpret_cast<LastLayerHandle>(handle), hid, saddr, j, *a++);
+  int32_t saddr = start_addr;
+  uint32_t wdata;
+  for (auto i = 0; i < input.numel() / WORD_BYTES; i = i + num_word) {
+    for (auto j = 0; j < num_word; j++) {
+        wdata = 0;
+        for (auto k = 0; k < WORD_BYTES; k++) {
+            wdata = wdata | ((*a++ << 8*k) & (0xff << 8*k));
+        }
+        LastLayerWriteMem(reinterpret_cast<LastLayerHandle>(handle), hid, saddr, j, wdata);
     }
     saddr++;
   }
@@ -43,11 +52,16 @@ torch::Tensor read_mem(TorchDeviceHandle handle,
                        int64_t num_elem) {
     torch::Tensor output = torch::ones(num_elem, torch::kInt8);
     TORCH_CHECK(output.is_contiguous());
+    TORCH_CHECK(num_elem >= WORD_BYTES && num_elem % WORD_BYTES == 0)
     int8_t* a = (int8_t*)output.data_ptr();
-    int saddr = start_addr;
-    for (int i = 0; i < num_elem; i = i + num_word) {
-        for (int j = 0; j < num_word; j++) {
-            *a++ = LastLayerReadMem(reinterpret_cast<LastLayerHandle>(handle), hid, saddr, j);
+    int32_t saddr = start_addr;
+    uint32_t rdata;
+    for (auto i = 0; i < num_elem / WORD_BYTES; i = i + num_word) {
+        for (auto j = 0; j < num_word; j++) {
+            rdata = LastLayerReadMem(reinterpret_cast<LastLayerHandle>(handle), hid, saddr, j);
+            for (auto k = 0; k < WORD_BYTES; k++) {
+                *a++ = rdata >> 8*k;
+            }
         }
         saddr++;
     }
