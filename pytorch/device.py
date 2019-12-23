@@ -5,7 +5,7 @@ class Device:
         torch.ops.load_library(lib)
         self.handle = torch.ops.device.alloc()
         self.num_word = 1
-        self.sel = 0  # select byte-0
+        self.sel = 0
         self.raddr_hid = 0
         self.waddr_hid = 1
         self.rmem_hid = 0
