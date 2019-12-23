@@ -24,7 +24,6 @@ finish = dev.finish()
 if finish:
     ty = dev.read_mem(0, n)
     cycle_counter = dev.get_cycle_counter()
-    print("finish:", finish)
     print("cycles:", cycle_counter)
     print("input:", tx)
     print("output:", ty)
