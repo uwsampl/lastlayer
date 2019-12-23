@@ -43,7 +43,7 @@ class Device:
     def set_length(self, value):
         torch.ops.device.write_reg(self.handle, self.length_id, self.sel, value)
 
-    def get_clock_cycles(self):
+    def get_cycle_counter(self):
         return torch.ops.device.read_reg(self.handle, self.cycle_id, self.sel)
 
     def write_mem(self, start_addr, input):

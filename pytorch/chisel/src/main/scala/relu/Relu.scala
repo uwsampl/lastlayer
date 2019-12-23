@@ -39,6 +39,24 @@ class VecOp(implicit config: ReluConfig) extends Module {
   io.out := out.asTypeOf(io.out)
 }
 
+class Exit extends BlackBox with HasBlackBoxInline {
+  val io = IO(new Bundle{
+    val en = Input(Bool())
+  })
+  setInline("Exit.v",
+    s"""
+      |module Exit(
+      |  input en
+      |);
+      |always @* begin
+      |  if (en) begin
+      |    $$finish;
+      |  end
+      |end
+      |endmodule
+    """.stripMargin)
+}
+
 class Relu(implicit config: ReluConfig) extends Module {
   val io = IO(new Bundle{
     // these memory ports prevent optimize memory away
@@ -49,6 +67,7 @@ class Relu(implicit config: ReluConfig) extends Module {
     val raddr = Input(UInt(config.memAddrWidth.W))
     val rdata = Output(UInt(config.memDataWidth.W))
   })
+  val exit = Module(new Exit)
   val vop = Module(new VecOp)
   val rmem = SyncReadMem(config.memDepth, UInt(config.memDataWidth.W))
   val wmem = SyncReadMem(config.memDepth, UInt(config.memDataWidth.W))
@@ -105,6 +124,7 @@ class Relu(implicit config: ReluConfig) extends Module {
   }
 
   finish := state === sDone
+  exit.io.en := finish
 
   val ren = (state === sIdle & launch) | state === sRead
   vop.io.in := rmem.read(raddr, ren)
