@@ -13,9 +13,7 @@ void dealloc(TorchDeviceHandle handle) {
 }
 
 int64_t read_reg(TorchDeviceHandle handle, int64_t hid, int64_t sel) {
-    int64_t value = 0;
-    value = LastLayerReadReg(reinterpret_cast<LastLayerHandle>(handle), hid, sel);
-    return value;
+    return LastLayerReadReg(reinterpret_cast<LastLayerHandle>(handle), hid, sel);
 }
 
 void write_reg(TorchDeviceHandle handle, int64_t hid, int64_t sel, int64_t value) {

@@ -21,6 +21,7 @@ dev.run(20)
 finish = dev.finish()
 ty = dev.read_mem(0, n)
 
+print("waddr:", dev.get_waddr())
 print("finish:", finish)
 print("input:", tx)
 print("output:", ty)

@@ -71,6 +71,7 @@ module __Relu_dpi;
         input int sel;
         reg [32-1:0] data;
         begin
+            data = 0;
             data[0 +: 1] = __Relu.dut.finish;
             return data[sel*32 +: 32];
         end
