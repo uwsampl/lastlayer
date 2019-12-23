@@ -11,6 +11,7 @@ module __adder_dpi;
         input int sel;
         reg [32-1:0] data;
         begin
+            data = 0;
             data[0 +: 8] = __adder.dut.a;
             return data[sel*32 +: 32];
         end
@@ -31,6 +32,7 @@ module __adder_dpi;
         input int sel;
         reg [32-1:0] data;
         begin
+            data = 0;
             data[0 +: 8] = __adder.dut.b;
             return data[sel*32 +: 32];
         end
@@ -51,6 +53,7 @@ module __adder_dpi;
         input int sel;
         reg [32-1:0] data;
         begin
+            data = 0;
             data[0 +: 8] = __adder.dut.y;
             return data[sel*32 +: 32];
         end

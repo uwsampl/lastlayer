@@ -18,13 +18,13 @@ class Device:
         self.lib.LastLayerDealloc(self.handle)
 
     def read_reg_a(self):
-        return int.from_bytes(self.lib.LastLayerReadReg(self.handle, 0, self.sel), byteorder="big")
+        return self.lib.LastLayerReadReg(self.handle, 0, self.sel)
 
     def read_reg_b(self):
-        return int.from_bytes(self.lib.LastLayerReadReg(self.handle, 1, self.sel), byteorder="big")
+        return self.lib.LastLayerReadReg(self.handle, 1, self.sel)
 
     def read_reg_y(self):
-        return int.from_bytes(self.lib.LastLayerReadReg(self.handle, 2, self.sel), byteorder="big")
+        return self.lib.LastLayerReadReg(self.handle, 2, self.sel)
 
     def write_reg_a(self, value):
         self.lib.LastLayerWriteReg(self.handle, 0, self.sel, int(value))
