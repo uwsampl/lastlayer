@@ -111,7 +111,7 @@ module __Relu_dpi;
         input int sel;
         reg [32-1:0] data;
         begin
-            data[0 +: 10] = __Relu.dut.counter;
+            data[0 +: 32] = __Relu.dut.cycle;
             return data[sel*32 +: 32];
         end
     endfunction
@@ -121,9 +121,9 @@ module __Relu_dpi;
         input int value;
         reg [32-1:0] data;
         begin
-            data[0 +: 10] = __Relu.dut.counter;
+            data[0 +: 32] = __Relu.dut.cycle;
             data[sel*32 +: 32] = value;
-            __Relu.dut.counter = data[0 +: 10];
+            __Relu.dut.cycle = data[0 +: 32];
         end
     endfunction
 

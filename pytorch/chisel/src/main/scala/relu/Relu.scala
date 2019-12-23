@@ -9,6 +9,7 @@ case class ReluConfig() {
   val memDepth = 1024
   val memDataWidth = xLen * opDataWidth
   val memAddrWidth = log2Ceil(memDepth)
+  val cycleCounterWidth = 32
 }
 
 class Op(implicit config: ReluConfig) extends Module {
@@ -53,6 +54,7 @@ class Relu(implicit config: ReluConfig) extends Module {
   val wmem = SyncReadMem(config.memDepth, UInt(config.memDataWidth.W))
   val launch = RegInit(false.B)
   val finish = RegInit(false.B)
+  val cycle = RegInit(0.U(config.cycleCounterWidth.W))
   val counter = RegInit(0.U(config.memAddrWidth.W))
   val length = RegInit(0.U(config.memAddrWidth.W))
   val raddr = RegInit(0.U(config.memAddrWidth.W))
@@ -80,6 +82,12 @@ class Relu(implicit config: ReluConfig) extends Module {
     is(sDone) {
       state := sDone
     }
+  }
+
+  when (state === sIdle) {
+    cycle := 0.U
+  } .elsewhen (state =/= sDone) {
+    cycle := cycle + 1.U
   }
 
   when (state === sIdle) {
@@ -114,7 +122,7 @@ class Relu(implicit config: ReluConfig) extends Module {
   dontTouch(launch)
   dontTouch(finish)
   dontTouch(length)
-  dontTouch(counter)
+  dontTouch(cycle)
 }
 
 object Relu extends App {
