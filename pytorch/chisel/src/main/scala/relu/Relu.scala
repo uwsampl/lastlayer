@@ -9,7 +9,6 @@ case class ReluConfig() {
   val memDepth = 1024
   val memDataWidth = xLen * opDataWidth
   val memAddrWidth = log2Ceil(memDepth)
-  val counterWidth = 16
 }
 
 class Op(implicit config: ReluConfig) extends Module {
@@ -52,27 +51,55 @@ class Relu(implicit config: ReluConfig) extends Module {
   val vop = Module(new VecOp)
   val rmem = SyncReadMem(config.memDepth, UInt(config.memDataWidth.W))
   val wmem = SyncReadMem(config.memDepth, UInt(config.memDataWidth.W))
-  val active = RegInit(false.B)
-  val idle = RegInit(false.B)
-  val cycle = RegInit(0.U(config.counterWidth.W))
-  val numop = RegInit(0.U(config.memAddrWidth.W))
+  val launch = RegInit(false.B)
+  val finish = RegInit(false.B)
+  val counter = RegInit(0.U(config.memAddrWidth.W))
   val length = RegInit(0.U(config.memAddrWidth.W))
   val raddr = RegInit(0.U(config.memAddrWidth.W))
   val waddr = RegInit(0.U(config.memAddrWidth.W))
 
-  when (active && !idle) {
+  val sIdle :: sRead :: sWrite :: sDone :: Nil = Enum(4)
+  val state = RegInit(sIdle)
+
+  switch(state) {
+    is(sIdle) {
+      when(launch) {
+        state := sRead
+      }
+    }
+    is(sRead) {
+      state := sWrite
+    }
+    is(sWrite) {
+      when (counter === length) {
+        state := sDone
+      } .otherwise {
+        state := sRead
+      }
+    }
+    is(sDone) {
+      state := sDone
+    }
+  }
+
+  when (state === sIdle) {
+    counter := 0.U
+  } .elsewhen (state === sRead) {
+    counter := counter + 1.U
+  }
+
+  when (state === sRead) {
     raddr := raddr + 1.U
+  }
+
+  when (state === sWrite) {
     waddr := waddr + 1.U
-    cycle := cycle + 1.U
-    numop := numop + config.xLen.U
   }
 
-  when (numop === length) {
-    idle := true.B
-    active := false.B
-  }
+  finish := state === sDone
 
-  vop.io.in := rmem.read(raddr, active)
+  val ren = (state === sIdle & launch) | state === sRead
+  vop.io.in := rmem.read(raddr, ren)
   wmem.write(waddr, vop.io.out)
 
   // this prevents rmem to be removed
@@ -84,9 +111,10 @@ class Relu(implicit config: ReluConfig) extends Module {
   io.rdata := wmem.read(io.raddr, io.ren)
 
   // do not remove these registers
-  dontTouch(active)
+  dontTouch(launch)
+  dontTouch(finish)
   dontTouch(length)
-  dontTouch(cycle)
+  dontTouch(counter)
 }
 
 object Relu extends App {

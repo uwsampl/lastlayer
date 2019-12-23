@@ -47,6 +47,86 @@ module __Relu_dpi;
         end
     endfunction
 
+    function int dpi_read_reg_launch;
+        input int sel;
+        reg [32-1:0] data;
+        begin
+            data[0 +: 1] = __Relu.dut.launch;
+            return data[sel*32 +: 32];
+        end
+    endfunction
+
+    function void dpi_write_reg_launch;
+        input int sel;
+        input int value;
+        reg [32-1:0] data;
+        begin
+            data[0 +: 1] = __Relu.dut.launch;
+            data[sel*32 +: 32] = value;
+            __Relu.dut.launch = data[0 +: 1];
+        end
+    endfunction
+
+    function int dpi_read_reg_finish;
+        input int sel;
+        reg [32-1:0] data;
+        begin
+            data[0 +: 1] = __Relu.dut.finish;
+            return data[sel*32 +: 32];
+        end
+    endfunction
+
+    function void dpi_write_reg_finish;
+        input int sel;
+        input int value;
+        reg [32-1:0] data;
+        begin
+            data[0 +: 1] = __Relu.dut.finish;
+            data[sel*32 +: 32] = value;
+            __Relu.dut.finish = data[0 +: 1];
+        end
+    endfunction
+
+    function int dpi_read_reg_length;
+        input int sel;
+        reg [32-1:0] data;
+        begin
+            data[0 +: 10] = __Relu.dut.length;
+            return data[sel*32 +: 32];
+        end
+    endfunction
+
+    function void dpi_write_reg_length;
+        input int sel;
+        input int value;
+        reg [32-1:0] data;
+        begin
+            data[0 +: 10] = __Relu.dut.length;
+            data[sel*32 +: 32] = value;
+            __Relu.dut.length = data[0 +: 10];
+        end
+    endfunction
+
+    function int dpi_read_reg_cycle;
+        input int sel;
+        reg [32-1:0] data;
+        begin
+            data[0 +: 10] = __Relu.dut.counter;
+            return data[sel*32 +: 32];
+        end
+    endfunction
+
+    function void dpi_write_reg_cycle;
+        input int sel;
+        input int value;
+        reg [32-1:0] data;
+        begin
+            data[0 +: 10] = __Relu.dut.counter;
+            data[sel*32 +: 32] = value;
+            __Relu.dut.counter = data[0 +: 10];
+        end
+    endfunction
+
     function int dpi_read_mem_rmem;
         input int addr;
         input int sel;
@@ -101,6 +181,18 @@ module __Relu_dpi;
             else if (hid == 1) begin
                 return dpi_read_reg_waddr(sel);
             end
+            else if (hid == 2) begin
+                return dpi_read_reg_launch(sel);
+            end
+            else if (hid == 3) begin
+                return dpi_read_reg_finish(sel);
+            end
+            else if (hid == 4) begin
+                return dpi_read_reg_length(sel);
+            end
+            else if (hid == 5) begin
+                return dpi_read_reg_cycle(sel);
+            end
             else begin
                 $error("[dpi-read-reg] invalid hid");
             end
@@ -117,6 +209,18 @@ module __Relu_dpi;
             end
             else if (hid == 1) begin
                 dpi_write_reg_waddr(sel, value);
+            end
+            else if (hid == 2) begin
+                dpi_write_reg_launch(sel, value);
+            end
+            else if (hid == 3) begin
+                dpi_write_reg_finish(sel, value);
+            end
+            else if (hid == 4) begin
+                dpi_write_reg_length(sel, value);
+            end
+            else if (hid == 5) begin
+                dpi_write_reg_cycle(sel, value);
             end
             else begin
                 $error("[dpi-write-reg] invalid hid");
