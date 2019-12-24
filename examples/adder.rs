@@ -14,9 +14,7 @@ fn lastlayer_build(build_dir: &Path, adder_dir: &Path) {
 
 fn run_test(bin: &Path, adder_dir: &Path) {
     let mut cmd = Command::new(bin);
-    cmd.arg(adder_dir.join("test.py"))
-        .arg("--adder-dir")
-        .arg(adder_dir);
+    cmd.arg(adder_dir.join("test.py"));
     run_cmd(&mut cmd);
 }
 

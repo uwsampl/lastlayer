@@ -32,14 +32,22 @@ fn lastlayer_build(torch_dir: &Path, relu_dir: &Path, num_vec_words: u64) {
         .compile(&format!("relu_{}", num_vec_words));
 }
 
+fn run_test(bin: &Path, relu_dir: &Path) {
+    let mut cmd = Command::new(bin);
+    cmd.arg(relu_dir.join("test.py"));
+    run_cmd(&mut cmd);
+}
+
 fn main() {
     let torch_dir =
         get_manifest_dir().join("miniconda/local/lib/python3.7/site-packages/torch");
+    let python_bin = get_manifest_dir().join("miniconda/local/bin/python3.7");
     let relu_dir = get_manifest_dir().join("examples/relu");
-    let total = 2;
+    let total = 1;
     let base: u64 = 2;
     for i in 0..total {
         compile_chisel(base.pow(i));
         lastlayer_build(&torch_dir, &relu_dir, base.pow(i));
     }
+    run_test(&python_bin, &relu_dir);
 }
