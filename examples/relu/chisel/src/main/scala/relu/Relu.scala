@@ -155,7 +155,7 @@ object Relu extends App {
   val parser = new scopt.OptionParser[ReluArgs]("scopt") {
     opt[String]("target-dir") required() action { (x, c) =>
       c.copy(targetDir = x) }
-    opt[Int]("num-vector-words") required() action { (x, c) =>
+    opt[Int]("num-vec-words") required() action { (x, c) =>
       c.copy(numVecWords = x) }
   }
   parser.parse(args, ReluArgs()) map { a =>

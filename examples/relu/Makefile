@@ -8,7 +8,7 @@
 
 chisel: verilog/Relu.v
 verilog/Relu.v:
-	cd chisel && sbt 'runMain relu.Relu --target-dir ../v2 --num-vector-words 2'
+	cd chisel && sbt " runMain relu.Relu --target-dir ../v2 --num-vector-words 2 "
 
 clean:
 	-rm -rf build __pycache__ verilog

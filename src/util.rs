@@ -1,5 +1,6 @@
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use std::env::set_current_dir;
 
 pub fn get_manifest_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
@@ -29,4 +30,8 @@ pub fn run_cmd(cmd: &mut Command) {
     if !status.success() {
         panic!("command did not execute successfully");
     }
+}
+
+pub fn change_dir(dir: &Path) {
+    set_current_dir(dir).expect("failed to change dir");
 }
