@@ -1,5 +1,6 @@
 use lastlayer::util::{get_manifest_dir, run_cmd, change_dir};
 use lastlayer::Build;
+use std::path::Path;
 use std::process::Command;
 
 fn compile_chisel(num_vec_words: u64) {
@@ -13,25 +14,32 @@ fn compile_chisel(num_vec_words: u64) {
     change_dir(&manifest_dir);
 }
 
+fn lastlayer_build(torch_dir: &Path, relu_dir: &Path, num_vec_words: u64) {
+    Build::new()
+        .out_dir(relu_dir.join(format!("relu_{}", num_vec_words)))
+        .top_module("Relu")
+        .cc_flag("-std=c++11")
+        .cc_link_dir(torch_dir.join("lib"))
+        .cc_include_dir(torch_dir.join("include"))
+        .cc_link_lib("c10")
+        .cc_link_lib("torch")
+        .cc_link_lib("shm")
+        .cc_link_lib("torch_python")
+        .cc_file(relu_dir.join("relu.cc"))
+        .verilog_file(relu_dir.join(format!("relu_{}/Relu.v", num_vec_words)))
+        .verilog_file(relu_dir.join(format!("relu_{}/Exit.v", num_vec_words)))
+        .verilog_file(relu_dir.join(format!("dpi/relu_dpi_{}.v", num_vec_words)))
+        .compile(&format!("relu_{}", num_vec_words));
+}
+
 fn main() {
-    compile_chisel(1);
-    // let miniconda_torch_dir =
-    //     get_manifest_dir().join("miniconda/local/lib/python3.7/site-packages/torch");
-    // let pytorch_dir = get_manifest_dir().join("pytorch");
-    // let build_dir = pytorch_dir.join("build");
-    // Build::new()
-    //     .out_dir(&build_dir)
-    //     .top_module("Relu")
-    //     .cc_flag("-std=c++11")
-    //     .cc_link_dir(&miniconda_torch_dir.join("lib"))
-    //     .cc_include_dir(&miniconda_torch_dir.join("include"))
-    //     .cc_link_lib("c10")
-    //     .cc_link_lib("torch")
-    //     .cc_link_lib("shm")
-    //     .cc_link_lib("torch_python")
-    //     .cc_file(&pytorch_dir.join("relu.cc"))
-    //     .verilog_file(&pytorch_dir.join("verilog/Relu.v"))
-    //     .verilog_file(&pytorch_dir.join("verilog/Exit.v"))
-    //     .verilog_file(&pytorch_dir.join("relu_dpi.v"))
-    //     .compile("relu");
+    let torch_dir =
+        get_manifest_dir().join("miniconda/local/lib/python3.7/site-packages/torch");
+    let relu_dir = get_manifest_dir().join("examples/relu");
+    let total = 2;
+    let base: u64 = 2;
+    for i in 0..total {
+        compile_chisel(base.pow(i));
+        lastlayer_build(&torch_dir, &relu_dir, base.pow(i));
+    }
 }

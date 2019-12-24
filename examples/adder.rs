@@ -3,7 +3,7 @@ use lastlayer::Build;
 use std::path::Path;
 use std::process::Command;
 
-fn build(build_dir: &Path, adder_dir: &Path) {
+fn lastlayer_build(build_dir: &Path, adder_dir: &Path) {
     Build::new()
         .out_dir(build_dir)
         .top_module("adder")
@@ -24,6 +24,6 @@ fn main() {
     let adder_dir = get_manifest_dir().join("examples/adder");
     let build_dir = &adder_dir.join("build");
     let python_bin = get_manifest_dir().join("miniconda/local/bin/python3.7");
-    build(&build_dir, &adder_dir);
+    lastlayer_build(&build_dir, &adder_dir);
     run_test(&python_bin, &adder_dir);
 }
