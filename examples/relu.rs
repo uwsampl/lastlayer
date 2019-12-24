@@ -33,10 +33,13 @@ fn lastlayer_build(torch_dir: &Path, relu_dir: &Path, num_vec_words: u64) {
 }
 
 fn run_test(bin: &Path, relu_dir: &Path, num_vec_words: u64) {
+    let repeat = 1;
     let mut cmd = Command::new(bin);
     cmd.arg(relu_dir.join("test.py"))
         .arg("--num-vec-words")
-        .arg(&format!("{}", num_vec_words));
+        .arg(&format!("{}", num_vec_words))
+        .arg("--repeat")
+        .arg(&format!("{}", &repeat));
     run_cmd(&mut cmd);
 }
 

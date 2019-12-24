@@ -21,7 +21,7 @@ def relu(lib, n, num_vec_words):
     stop = perf_counter_ns()
     finish = dev.finish()
     z = x.clamp(min=0)
-    assert finish == int(1), "Relu accelerator did not finish"
+    assert finish == 1, "Relu accelerator did not finish"
     y = dev.read_mem(n)
     cycle_counter = dev.get_cycle_counter()
     assert torch.all(torch.eq(y, z)), "Relu fail, mismatch"
