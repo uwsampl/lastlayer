@@ -5,7 +5,7 @@ import chisel3.util._
 import scopt.OptionParser
 
 case class ReluConfig(numVecWords: Int) {
-  assert(numVecWords > 0)
+  assert(numVecWords > 0 && (numVecWords & (numVecWords-1)) == 0) // only power of 2?
   val vecWordBytes = 4
   val opDataWidth = 8
   val memDepth = 65536
