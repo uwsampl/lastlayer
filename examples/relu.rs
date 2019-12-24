@@ -33,13 +33,10 @@ fn lastlayer_build(torch_dir: &Path, relu_dir: &Path, num_vec_words: u64) {
 }
 
 fn run_test(bin: &Path, relu_dir: &Path, num_vec_words: u64) {
-    let repeat = 1;
     let mut cmd = Command::new(bin);
-    cmd.arg(relu_dir.join("test.py"))
+    cmd.arg(relu_dir.join("relu.py"))
         .arg("--num-vec-words")
-        .arg(&format!("{}", num_vec_words))
-        .arg("--repeat")
-        .arg(&format!("{}", &repeat));
+        .arg(&format!("{}", num_vec_words));
     run_cmd(&mut cmd);
 }
 
@@ -50,9 +47,12 @@ fn main() {
     let relu_dir = get_manifest_dir().join("examples/relu");
     let total = 2;
     let base: u64 = 2;
+    let repeat = 16;
     for i in 0..total {
         compile_chisel(base.pow(i));
         lastlayer_build(&torch_dir, &relu_dir, base.pow(i));
-        run_test(&python_bin, &relu_dir, base.pow(i));
+        for _i in 0..repeat {
+            run_test(&python_bin, &relu_dir, base.pow(i));
+        }
     }
 }

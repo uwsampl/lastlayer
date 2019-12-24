@@ -1,6 +1,9 @@
 import numpy as np
 import torch
 from time import perf_counter_ns
+import os
+import sys
+import argparse
 from device import Device
 
 def relu(lib, n, num_vec_words):
@@ -27,3 +30,20 @@ def relu(lib, n, num_vec_words):
     assert torch.all(torch.eq(y, z)), "Relu fail, mismatch"
     elapsed = stop-start
     return cycle_counter, elapsed
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--num-vec-words", type=int, required=True, help="number of vector words")
+    args = parser.parse_args()
+    relu_dir =  os.path.dirname(os.path.realpath(__file__))
+    sys.path.append(relu_dir)
+    n = 16384
+    dir = "relu_{}".format(args.num_vec_words)
+    lib = "librelu_{}.so".format(args.num_vec_words)
+    relu_lib = os.path.join(relu_dir, dir, lib)
+    vlen = []
+    cycles = []
+    etime = []
+    c, e = relu(relu_lib, n, args.num_vec_words)
+    vlen = args.num_vec_words * 4
+    print("results:{},{},{}".format(vlen, c, e))
