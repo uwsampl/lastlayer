@@ -2,9 +2,10 @@ package relu
 
 import chisel3._
 import chisel3.util._
+import scopt.OptionParser
 
-case class ReluConfig() {
-  val numVecWords = 2
+case class ReluConfig(numVecWords: Int) {
+  assert(numVecWords > 0)
   val vecWordBytes = 4
   val opDataWidth = 8
   val memDepth = 65536
@@ -59,7 +60,8 @@ class Exit extends BlackBox with HasBlackBoxInline {
     """.stripMargin)
 }
 
-class Relu(implicit config: ReluConfig) extends Module {
+class Relu(numVecWords: Int) extends Module {
+  implicit val config = ReluConfig(numVecWords)
   val io = IO(new Bundle{
     // these memory ports prevent optimize memory away
     val wen = Input(Bool())
@@ -147,7 +149,19 @@ class Relu(implicit config: ReluConfig) extends Module {
   dontTouch(cycle)
 }
 
+case class ReluArgs(targetDir: String = null, numVecWords: Int = 1)
+
 object Relu extends App {
-  implicit val config = ReluConfig()
-  chisel3.Driver.execute(args, () => new Relu)
+  val parser = new scopt.OptionParser[ReluArgs]("scopt") {
+    opt[String]("target-dir") required() action { (x, c) =>
+      c.copy(targetDir = x) }
+    opt[Int]("num-vector-words") required() action { (x, c) =>
+      c.copy(numVecWords = x) }
+  }
+  parser.parse(args, ReluArgs()) map { a =>
+    chisel3.Driver.execute(Array("--target-dir", a.targetDir),
+                           () => new Relu(a.numVecWords))
+  } getOrElse {
+    println("Something bad happen with command line arguments")
+  }
 }
