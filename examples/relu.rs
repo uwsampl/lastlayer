@@ -45,7 +45,7 @@ fn main() {
         get_manifest_dir().join("miniconda/local/lib/python3.7/site-packages/torch");
     let python_bin = get_manifest_dir().join("miniconda/local/bin/python3.7");
     let relu_dir = get_manifest_dir().join("examples/relu");
-    let total = 2;
+    let total = 8;
     let base: u64 = 2;
     let repeat = 16;
     for i in 0..total {
