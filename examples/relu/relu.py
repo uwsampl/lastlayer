@@ -46,4 +46,4 @@ if __name__ == "__main__":
     etime = []
     c, e = relu(relu_lib, n, args.num_vec_words)
     vlen = args.num_vec_words * 4
-    print("results:{},{},{}".format(vlen, c, e))
+    print("results:{},{},{}".format(vlen, c, e/1000000))
