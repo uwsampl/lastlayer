@@ -41,9 +41,6 @@ if __name__ == "__main__":
     dir = "relu_{}".format(args.num_vec_words)
     lib = "librelu_{}.so".format(args.num_vec_words)
     relu_lib = os.path.join(relu_dir, dir, lib)
-    vlen = []
-    cycles = []
-    etime = []
     c, e = relu(relu_lib, n, args.num_vec_words)
     vlen = args.num_vec_words * 4
     print("results:{},{},{}".format(vlen, c, e/1000000))
