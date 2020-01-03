@@ -109,7 +109,7 @@ module __adder_dpi;
         end
     endfunction
 
-    function byte dpi_read_mem;
+    function int dpi_read_mem;
         input int hid;
         input int addr;
         input int sel;
@@ -122,7 +122,7 @@ module __adder_dpi;
         input int hid;
         input int addr;
         input int sel;
-        input byte value;
+        input int value;
         begin
             $error("[dpi-write-mem] invalid hid");
         end
