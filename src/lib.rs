@@ -132,7 +132,8 @@ impl Build {
             .arg("-Mdir")
             .arg(self.get_out_dir())
             .arg("--top-module")
-            .arg(self.get_virtual_top_name());
+            .arg(self.get_virtual_top_name())
+            .arg("--assert");
         for file in self.verilog_files.iter() {
             cmd.arg(file);
         }
