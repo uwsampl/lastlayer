@@ -21,25 +21,25 @@ void LastLayerDealloc(LastLayerHandle handle) {
 int LastLayerReadReg(LastLayerHandle handle, int hid, int sel) {
     assert( handle != nullptr );
     svSetScope(svGetScopeFromName("TOP.{{vtop}}.dpi"));
-    return dpi_read_reg(hid, sel);
+    return dpi_reg_read(hid, sel);
 }
 
 void LastLayerWriteReg(LastLayerHandle handle, int hid, int sel, int value) {
     assert( handle != nullptr );
     svSetScope(svGetScopeFromName("TOP.{{vtop}}.dpi"));
-    dpi_write_reg(hid, sel, value);
+    dpi_reg_write(hid, sel, value);
 }
 
 int LastLayerReadMem(LastLayerHandle handle, int hid, int addr, int sel) {
     assert( handle != nullptr );
     svSetScope(svGetScopeFromName("TOP.{{vtop}}.dpi"));
-    return dpi_read_mem(hid, addr, sel);
+    return dpi_mem_read(hid, addr, sel);
 }
 
 void LastLayerWriteMem(LastLayerHandle handle, int hid, int addr, int sel, int value) {
     assert( handle != nullptr );
     svSetScope(svGetScopeFromName("TOP.{{vtop}}.dpi"));
-    dpi_write_mem(hid, addr, sel, value);
+    dpi_mem_write(hid, addr, sel, value);
 }
 
 void LastLayerReset(LastLayerHandle handle, int n) {

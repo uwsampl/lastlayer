@@ -1,4 +1,4 @@
-use lastlayer::util::{get_manifest_dir, run_cmd, change_dir};
+use lastlayer::util::{change_dir, get_manifest_dir, run_cmd};
 use lastlayer::Build;
 use std::path::Path;
 use std::process::Command;
@@ -6,7 +6,10 @@ use std::process::Command;
 fn compile_chisel(num_vec_words: u64) {
     let manifest_dir = get_manifest_dir();
     let chisel_dir = &manifest_dir.join("examples/relu/chisel");
-    let sbt_opt = format!("runMain relu.Relu --target-dir ../relu_{} --num-vec-words {}", num_vec_words, num_vec_words);
+    let sbt_opt = format!(
+        "runMain relu.Relu --target-dir ../relu_{} --num-vec-words {}",
+        num_vec_words, num_vec_words
+    );
     change_dir(&chisel_dir);
     let mut cmd = Command::new("sbt");
     cmd.arg(&sbt_opt);
@@ -41,8 +44,7 @@ fn run_test(bin: &Path, relu_dir: &Path, num_vec_words: u64) {
 }
 
 fn main() {
-    let torch_dir =
-        get_manifest_dir().join("miniconda/local/lib/python3.7/site-packages/torch");
+    let torch_dir = get_manifest_dir().join("miniconda/local/lib/python3.7/site-packages/torch");
     let python_bin = get_manifest_dir().join("miniconda/local/bin/python3.7");
     let relu_dir = get_manifest_dir().join("examples/relu");
     let total = 8;

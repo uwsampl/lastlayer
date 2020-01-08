@@ -6,7 +6,22 @@ use std::fs::File;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
+pub mod awig;
 pub mod util;
+
+#[derive(Clone, Debug)]
+pub struct Register {
+    pub hid: u32,
+    pub path: String,
+    pub width: u32,
+}
+
+#[derive(Clone, Debug)]
+pub struct Memory {
+    pub hid: u32,
+    pub path: String,
+    pub width: u32,
+}
 
 pub struct Build {
     tool_name: String,
@@ -24,6 +39,8 @@ pub struct Build {
     out_dir: Option<PathBuf>,
     handlebars_dir: Option<PathBuf>,
     bin: Option<PathBuf>,
+    reg: Vec<Register>,
+    mem: Vec<Memory>,
 }
 
 #[derive(Serialize)]
@@ -126,6 +143,24 @@ impl Build {
         self
     }
 
+    fn compile_awig(&mut self) -> &mut Build {
+        let name = format!("{}_dpi", self.get_virtual_top_name());
+        let filename = format!("{}.v", &name);
+        let file = self.get_out_dir().join(&filename);
+        awig::compile(
+            &file,
+            &self.get_virtual_top_name(),
+            &name,
+            "dpi_reg",
+            "dpi_mem",
+            &self.reg,
+            &self.mem,
+        )
+        .expect("AWIG failed");
+        self.verilog_file(file);
+        self
+    }
+
     fn compile_verilog(&self) {
         let mut cmd = Command::new(self.get_bin());
         cmd.arg("--cc")
@@ -216,7 +251,19 @@ impl Build {
             out_dir: None,
             handlebars_dir: Some(get_manifest_dir().join("src/handlebars")),
             bin: Some(get_manifest_dir().join("verilator/build/bin/verilator")),
+            reg: Vec::new(),
+            mem: Vec::new(),
         }
+    }
+
+    pub fn add_register(&mut self, reg: Register) -> &mut Build {
+        self.reg.push(reg);
+        self
+    }
+
+    pub fn add_memory(&mut self, mem: Memory) -> &mut Build {
+        self.mem.push(mem);
+        self
     }
 
     pub fn verilog_disable_warning(&mut self, name: &str) -> &mut Build {
@@ -226,7 +273,7 @@ impl Build {
 
     pub fn top_module(&mut self, name: &str) -> &mut Build {
         self.top_name = Some(name.to_string());
-        self.virtual_top_name = Some(format!("__{}", self.get_top_name()));
+        self.virtual_top_name = Some(format!("lastlayer_{}", self.get_top_name()));
         self
     }
 
@@ -287,6 +334,7 @@ impl Build {
         self.create_out_dir();
         self.create_virtual_verilog_top();
         self.create_virtual_cc_top();
+        self.compile_awig();
         self.default_verilog_warning();
         self.compile_verilog();
         self.default_cc_files();
