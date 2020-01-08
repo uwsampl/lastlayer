@@ -1,5 +1,5 @@
 use lastlayer::util::{change_dir, get_manifest_dir, run_cmd};
-use lastlayer::{Build, Register, Memory};
+use lastlayer::{Build, Memory, Register};
 use std::path::Path;
 use std::process::Command;
 
