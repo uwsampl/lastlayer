@@ -1,9 +1,9 @@
 use lastlayer::util::{change_dir, get_manifest_dir, run_cmd};
-use lastlayer::Build;
+use lastlayer::{Build, Register, Memory};
 use std::path::Path;
 use std::process::Command;
 
-fn compile_chisel(num_vec_words: u64) {
+fn compile_chisel(num_vec_words: u32) {
     let manifest_dir = get_manifest_dir();
     let chisel_dir = &manifest_dir.join("examples/relu/chisel");
     let sbt_opt = format!(
@@ -17,7 +17,8 @@ fn compile_chisel(num_vec_words: u64) {
     change_dir(&manifest_dir);
 }
 
-fn lastlayer_build(torch_dir: &Path, relu_dir: &Path, num_vec_words: u64) {
+fn lastlayer_build(torch_dir: &Path, relu_dir: &Path, num_vec_words: u32) {
+    let mem_width = num_vec_words * 4 * 8;
     Build::new()
         .out_dir(relu_dir.join(format!("relu_{}", num_vec_words)))
         .top_module("Relu")
@@ -31,11 +32,50 @@ fn lastlayer_build(torch_dir: &Path, relu_dir: &Path, num_vec_words: u64) {
         .cc_file(relu_dir.join("relu.cc"))
         .verilog_file(relu_dir.join(format!("relu_{}/Relu.v", num_vec_words)))
         .verilog_file(relu_dir.join(format!("relu_{}/Exit.v", num_vec_words)))
-        .verilog_file(relu_dir.join(format!("dpi/relu_dpi_{}.v", num_vec_words)))
+        .add_register(Register {
+            hid: 0,
+            path: "Relu.raddr".to_string(),
+            width: 16,
+        })
+        .add_register(Register {
+            hid: 1,
+            path: "Relu.waddr".to_string(),
+            width: 16,
+        })
+        .add_register(Register {
+            hid: 2,
+            path: "Relu.launch".to_string(),
+            width: 1,
+        })
+        .add_register(Register {
+            hid: 3,
+            path: "Relu.finish".to_string(),
+            width: 1,
+        })
+        .add_register(Register {
+            hid: 4,
+            path: "Relu.length".to_string(),
+            width: 16,
+        })
+        .add_register(Register {
+            hid: 5,
+            path: "Relu.cycle".to_string(),
+            width: 32,
+        })
+        .add_memory(Memory {
+            hid: 0,
+            path: "Relu.rmem".to_string(),
+            width: mem_width.clone(),
+        })
+        .add_memory(Memory {
+            hid: 1,
+            path: "Relu.wmem".to_string(),
+            width: mem_width.clone(),
+        })
         .compile(&format!("relu_{}", num_vec_words));
 }
 
-fn run_test(bin: &Path, relu_dir: &Path, num_vec_words: u64) {
+fn run_test(bin: &Path, relu_dir: &Path, num_vec_words: u32) {
     let mut cmd = Command::new(bin);
     cmd.arg(relu_dir.join("relu.py"))
         .arg("--num-vec-words")
@@ -47,8 +87,8 @@ fn main() {
     let torch_dir = get_manifest_dir().join("miniconda/local/lib/python3.7/site-packages/torch");
     let python_bin = get_manifest_dir().join("miniconda/local/bin/python3.7");
     let relu_dir = get_manifest_dir().join("examples/relu");
-    let total = 8;
-    let base: u64 = 2;
+    let total = 1;
+    let base: u32 = 2;
     let repeat = 16;
     for i in 0..total {
         compile_chisel(base.pow(i));
