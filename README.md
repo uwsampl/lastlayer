@@ -8,6 +8,7 @@ The tool will build Verilator from source and install PyTorch and NumPy with Min
 
 * Install rust `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
 * Install `flex bison autoconf g++ make git sbt`
+* Build everything `cargo build`. This will download and build Verilator and miniconda see `build.rs`.
 
 ## Run examples
 
