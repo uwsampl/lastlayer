@@ -32,7 +32,7 @@ The tool will build Verilator from source and install PyTorch and NumPy with Min
 
 * Install rust `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
 * Install `flex bison autoconf g++ make git sbt`
-    * `sbt` is only needed for the ReLu/PyTorch example which relies on hardware designed in Chisel
+    * `sbt` is only needed for the ReLu/PyTorch example, because ReLu is designed in Chisel
 * Build everything `cargo build`. This will download and build Verilator and miniconda see `build.rs`
 
 ## Run examples
