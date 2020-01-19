@@ -8,7 +8,7 @@ memories in the design according to user specification. This mechanism is based 
 generating a wrapper interface for these resources in similar fashion to what [SWIG](http://www.swig.org/)
 does for C and C++ programs. Moreover, there is no special requirements on how close to completion
 the hardware design is for integrating it with other programming languages. One could integrate
-a desgin based on a simple `AND` gate or fully fledge hardware design such as a processor
+a desgin based on a simple logical gate or fully fledge hardware design such as a processor
 using this tool. Concretely, the tool provides the following features:
 
 * Automatic wrapper interface generation, which generates Direct Programming Interface (DPI) functions
@@ -21,13 +21,16 @@ a shared library that can be easily loaded in other languages.
 * Flexible device interface, which exposes a fixed interface to interact with the shared library generated
 by the build system together with functions for controlling hardware simulation.
 
+We evaluated two representative system integration design patterns: a hardware integrated with
+NumPy and a ReLu accelerator integrated with PyTorch using TorchScript.
+
+Finally, the tool was developed in Rust and tested on the following version Rust version `1.4.0`.
 
 ## Build steps
 
 The tool will build Verilator from source and install PyTorch and NumPy with Miniconda check `build.rs`
 
 * Install rust `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
-    * Tested with the following Rust version `1.4.0`
 * Install `flex bison autoconf g++ make git sbt`
     * `sbt` is only needed for the ReLu/PyTorch example which relies on hardware designed in Chisel
 * Build everything `cargo build`. This will download and build Verilator and miniconda see `build.rs`
