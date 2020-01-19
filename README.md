@@ -5,7 +5,7 @@ simulation at the system-level in a cycle-accurate fashion. This means that desi
 Verilog can be interfaced and simulated with any other any other programming language that supports
 a C foreing function interface (FFI). LastLayer provides a mechanism to access with registers and
 memories in the design according to user specification. This mechanism is based on automatically
-generating a wrapper interface for these resources in similar fashion to what [SWIG](http://www.swig.org/)
+generating a wrapper interface for these resources in a similar fashion to what [SWIG](http://www.swig.org/)
 does for C and C++ programs. Moreover, there is no special requirements on how close to completion
 the hardware design is for integrating it with other programming languages. One could integrate
 a desgin based on a simple logical gate or fully fledge hardware design such as a processor
