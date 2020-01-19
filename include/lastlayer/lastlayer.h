@@ -2,13 +2,13 @@
 extern "C" {
 #endif
 
-/* handle */
+/* device handle */
 typedef void* LastLayerHandle;
 
-/* allocate */
+/* allocate device */
 LastLayerHandle LastLayerAlloc();
 
-/* deallocate */
+/* deallocate device */
 void LastLayerDealloc(LastLayerHandle handle);
 
 /* read a register */
