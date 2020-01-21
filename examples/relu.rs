@@ -1,5 +1,5 @@
 use lastlayer::util::{change_dir, get_manifest_dir, run_cmd};
-use lastlayer::{Build, Memory, Register};
+use lastlayer::Build;
 use std::path::Path;
 use std::process::Command;
 
@@ -32,46 +32,14 @@ fn lastlayer_build(torch_dir: &Path, relu_dir: &Path, num_vec_words: u32) {
         .cc_file(relu_dir.join("relu.cc"))
         .verilog_file(relu_dir.join(format!("relu_{}/Relu.v", num_vec_words)))
         .verilog_file(relu_dir.join(format!("relu_{}/Exit.v", num_vec_words)))
-        .add_register(Register {
-            hid: 0,
-            path: "Relu.raddr".to_string(),
-            width: 16,
-        })
-        .add_register(Register {
-            hid: 1,
-            path: "Relu.waddr".to_string(),
-            width: 16,
-        })
-        .add_register(Register {
-            hid: 2,
-            path: "Relu.launch".to_string(),
-            width: 1,
-        })
-        .add_register(Register {
-            hid: 3,
-            path: "Relu.finish".to_string(),
-            width: 1,
-        })
-        .add_register(Register {
-            hid: 4,
-            path: "Relu.length".to_string(),
-            width: 16,
-        })
-        .add_register(Register {
-            hid: 5,
-            path: "Relu.cycle".to_string(),
-            width: 32,
-        })
-        .add_memory(Memory {
-            hid: 0,
-            path: "Relu.rmem".to_string(),
-            width: mem_width.clone(),
-        })
-        .add_memory(Memory {
-            hid: 1,
-            path: "Relu.wmem".to_string(),
-            width: mem_width.clone(),
-        })
+        .add_register(0, "Relu.raddr", 16)
+        .add_register(1, "Relu.waddr", 16)
+        .add_register(2, "Relu.launch", 1)
+        .add_register(3, "Relu.finish", 1)
+        .add_register(4, "Relu.length", 16)
+        .add_register(5, "Relu.cycle", 32)
+        .add_memory(0, "Relu.rmem", mem_width.clone())
+        .add_memory(1, "Relu.wmem", mem_width.clone())
         .compile(&format!("relu_{}", num_vec_words));
 }
 

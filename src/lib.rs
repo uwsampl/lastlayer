@@ -256,13 +256,21 @@ impl Build {
         }
     }
 
-    pub fn add_register(&mut self, reg: Register) -> &mut Build {
-        self.reg.push(reg);
+    pub fn add_register(&mut self, hid: u32, path: &str, width: u32) -> &mut Build {
+        self.reg.push(Register {
+            hid: hid,
+            path: path.to_string(),
+            width: width,
+        });
         self
     }
 
-    pub fn add_memory(&mut self, mem: Memory) -> &mut Build {
-        self.mem.push(mem);
+    pub fn add_memory(&mut self, hid: u32, path: &str, width: u32) -> &mut Build {
+        self.mem.push(Memory {
+            hid: hid,
+            path: path.to_string(),
+            width: width,
+        });
         self
     }
 

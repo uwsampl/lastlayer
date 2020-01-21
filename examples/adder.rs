@@ -1,5 +1,5 @@
 use lastlayer::util::{get_manifest_dir, run_cmd};
-use lastlayer::{Build, Register};
+use lastlayer::Build;
 use std::path::Path;
 use std::process::Command;
 
@@ -8,21 +8,9 @@ fn lastlayer_build(build_dir: &Path, adder_dir: &Path) {
         .out_dir(build_dir)
         .top_module("adder")
         .verilog_file(&adder_dir.join("adder.v"))
-        .add_register(Register {
-            hid: 0,
-            path: "adder.a".to_string(),
-            width: 8,
-        })
-        .add_register(Register {
-            hid: 1,
-            path: "adder.b".to_string(),
-            width: 8,
-        })
-        .add_register(Register {
-            hid: 2,
-            path: "adder.y".to_string(),
-            width: 8,
-        })
+        .add_register(0, "adder.a", 8)
+        .add_register(1, "adder.b", 8)
+        .add_register(2, "adder.y", 8)
         .compile("adder");
 }
 
