@@ -39,3 +39,7 @@ The tool will build Verilator from source and install PyTorch and NumPy with Min
 
 * Verilog Adder with NumPy `cargo run --example adder`
 * Chisel Relu with PyTorch `cargo run --example relu`
+
+## License
+
+[Apache-2.0](LICENSE) license.
