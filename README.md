@@ -2,13 +2,13 @@
 
 LastLayer is a tool for integrating hardware and software early in the design process, enabling
 simulation at the system-level in a cycle-accurate fashion. This means that designs expressed in
-Verilog can be interfaced and simulated with any other any other programming language that supports
-a C foreing function interface (FFI). LastLayer provides a mechanism to access with registers and
-memories in the design according to user specification. This mechanism is based on automatically
+Verilog can be interfaced and simulated with any other programming language that supports
+a C foreing function interface (FFI). LastLayer provides a mechanism to access registers and
+memories according to user specification. This mechanism is based on automatically
 generating a wrapper interface for these resources in a similar fashion to what [SWIG](http://www.swig.org/)
 does for C and C++ programs. Moreover, there is no special requirements on how close to completion
-the hardware design is for integrating it with other programming languages. One could integrate
-a desgin based on a simple logical gate or fully fledge hardware design such as a processor
+the hardware design is before integrating it with other programming languages. One could integrate
+a desgin based on a simple logical gate or any fully fledge hardware design such as a processor
 using this tool. Concretely, the tool provides the following features:
 
 * Automatic wrapper interface generation, which generates Direct Programming Interface (DPI) functions
@@ -18,7 +18,7 @@ for writing and reading registers and memories according to user specification.
 C++ with [Verilator](https://www.veripool.org/wiki/verilator). Then, it packages the design into
 a shared library that can be easily loaded in other languages.
 
-* Flexible device interface, which exposes a fixed interface to interact with the shared library generated
+* Flexible device interface, that exposes a fixed interface to interact with the shared library generated
 by the build system together with functions for controlling hardware simulation.
 
 We evaluated two representative system integration design patterns: a hardware integrated with
