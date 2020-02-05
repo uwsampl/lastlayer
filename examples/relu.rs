@@ -1,10 +1,10 @@
-use lastlayer::util::{change_dir, get_manifest_dir, run_cmd};
+use lastlayer::util::{change_dir, get_lastlayer_root_dir, run_cmd};
 use lastlayer::Build;
 use std::path::Path;
 use std::process::Command;
 
 fn compile_chisel(num_vec_words: u32) {
-    let manifest_dir = get_manifest_dir();
+    let manifest_dir = get_lastlayer_root_dir();
     let chisel_dir = &manifest_dir.join("examples/relu/chisel");
     let sbt_opt = format!(
         "runMain relu.Relu --target-dir ../relu_{} --num-vec-words {}",
@@ -52,9 +52,9 @@ fn run_test(bin: &Path, relu_dir: &Path, num_vec_words: u32) {
 }
 
 fn main() {
-    let torch_dir = get_manifest_dir().join("miniconda/local/lib/python3.7/site-packages/torch");
-    let python_bin = get_manifest_dir().join("miniconda/local/bin/python3.7");
-    let relu_dir = get_manifest_dir().join("examples/relu");
+    let torch_dir = get_lastlayer_root_dir().join("miniconda/local/lib/python3.7/site-packages/torch");
+    let python_bin = get_lastlayer_root_dir().join("miniconda/local/bin/python3.7");
+    let relu_dir = get_lastlayer_root_dir().join("examples/relu");
     let total = 1;
     let base: u32 = 2;
     let repeat = 16;

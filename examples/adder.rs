@@ -1,4 +1,4 @@
-use lastlayer::util::{get_manifest_dir, run_cmd};
+use lastlayer::util::{get_lastlayer_root_dir, run_cmd};
 use lastlayer::Build;
 use std::path::Path;
 use std::process::Command;
@@ -21,9 +21,9 @@ fn run_test(bin: &Path, adder_dir: &Path) {
 }
 
 fn main() {
-    let adder_dir = get_manifest_dir().join("examples/adder");
+    let adder_dir = get_lastlayer_root_dir().join("examples/adder");
     let build_dir = &adder_dir.join("build");
-    let python_bin = get_manifest_dir().join("miniconda/local/bin/python3.7");
+    let python_bin = get_lastlayer_root_dir().join("miniconda/local/bin/python3.7");
     lastlayer_build(&build_dir, &adder_dir);
     run_test(&python_bin, &adder_dir);
 }

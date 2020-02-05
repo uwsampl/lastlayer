@@ -2,7 +2,7 @@ use std::env::set_current_dir;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-pub fn get_manifest_dir() -> PathBuf {
+pub fn get_lastlayer_root_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
 }
 

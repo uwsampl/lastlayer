@@ -1,4 +1,4 @@
-use crate::util::{get_manifest_dir, run_cmd};
+use crate::util::{get_lastlayer_root_dir, run_cmd};
 use handlebars::Handlebars;
 use serde::Serialize;
 use std::error::Error;
@@ -187,7 +187,7 @@ impl Build {
     }
 
     fn default_cc_files(&mut self) -> &mut Build {
-        let include_dir = get_manifest_dir().join("verilator/build/share/verilator/include");
+        let include_dir = get_lastlayer_root_dir().join("verilator/build/share/verilator/include");
         let out_dir = self.get_out_dir();
         self.cc_file(&include_dir.join("verilated.cpp"));
         self.cc_file(&include_dir.join("verilated_dpi.cpp"));
@@ -199,8 +199,8 @@ impl Build {
     }
 
     fn default_include_dirs(&mut self) -> &mut Build {
-        let include_dir = get_manifest_dir().join("include/lastlayer");
-        let verilator_dir = get_manifest_dir().join("verilator/build/share/verilator/include");
+        let include_dir = get_lastlayer_root_dir().join("include/lastlayer");
+        let verilator_dir = get_lastlayer_root_dir().join("verilator/build/share/verilator/include");
         self.cc_include_dir(self.get_out_dir());
         self.cc_include_dir(&verilator_dir);
         self.cc_include_dir(&verilator_dir.join("vltstd"));
@@ -249,8 +249,8 @@ impl Build {
             cc_link_libs: Vec::new(),
             cc_files: Vec::new(),
             out_dir: None,
-            handlebars_dir: Some(get_manifest_dir().join("src/handlebars")),
-            bin: Some(get_manifest_dir().join("verilator/build/bin/verilator")),
+            handlebars_dir: Some(get_lastlayer_root_dir().join("src/handlebars")),
+            bin: Some(get_lastlayer_root_dir().join("verilator/build/bin/verilator")),
             reg: Vec::new(),
             mem: Vec::new(),
         }
