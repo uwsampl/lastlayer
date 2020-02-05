@@ -1,6 +1,6 @@
 use crate::{Memory, Register};
 use pretty::RcDoc;
-use std::collections::HashMap;
+use std::collections::HashSet;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
@@ -556,10 +556,10 @@ impl ToDoc for LastLayer {
 }
 
 fn check_register_hid(reg: &Vec<Register>) -> bool {
-    let mut map: HashMap<u32, u32> = HashMap::new();
+    let mut map: HashSet<u32> = HashSet::new();
     for r in reg.iter() {
-        if !map.contains_key(&r.hid) {
-            map.insert(r.hid, r.hid);
+        if !map.contains(&r.hid) {
+            map.insert(r.hid);
         } else {
             panic!("register hid already exists");
         }
@@ -568,10 +568,10 @@ fn check_register_hid(reg: &Vec<Register>) -> bool {
 }
 
 fn check_memory_hid(mem: &Vec<Memory>) -> bool {
-    let mut map: HashMap<u32, u32> = HashMap::new();
+    let mut map: HashSet<u32> = HashSet::new();
     for m in mem.iter() {
-        if !map.contains_key(&m.hid) {
-            map.insert(m.hid, m.hid);
+        if !map.contains(&m.hid) {
+            map.insert(m.hid);
         } else {
             panic!("memory hid already exists");
         }
