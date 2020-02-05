@@ -234,6 +234,13 @@ impl Build {
         run_cmd(&mut cmd);
     }
 
+    fn copy_header(&self) {
+        let mut cmd = Command::new("cp");
+        cmd.arg(get_lastlayer_root_dir().join("include/lastlayer/lastlayer.h"))
+            .arg(self.get_out_dir());
+        run_cmd(&mut cmd);
+    }
+
     pub fn new() -> Build {
         Build {
             tool_name: "lastlayer".to_string(),
@@ -348,6 +355,7 @@ impl Build {
         self.default_cc_files();
         self.default_include_dirs();
         self.compile_cxx(name);
+        self.copy_header();
         self
     }
 }
