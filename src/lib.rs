@@ -241,6 +241,14 @@ impl Build {
         run_cmd(&mut cmd);
     }
 
+    fn create_link_to_verilator_include(&self) {
+        let mut cmd = Command::new("ln");
+        cmd.arg("-s")
+            .arg(get_lastlayer_root_dir().join("verilator/build/share/verilator/include"))
+            .arg(self.get_out_dir().join("verilator"));
+        run_cmd(&mut cmd);
+    }
+
     pub fn new() -> Build {
         Build {
             tool_name: "lastlayer".to_string(),
@@ -356,6 +364,7 @@ impl Build {
         self.default_include_dirs();
         self.compile_cxx(name);
         self.copy_header();
+        self.create_link_to_verilator_include();
         self
     }
 }
