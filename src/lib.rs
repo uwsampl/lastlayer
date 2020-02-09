@@ -243,7 +243,7 @@ impl Build {
 
     fn create_link_to_verilator_include(&self) {
         let mut cmd = Command::new("ln");
-        cmd.arg("-s")
+        cmd.arg("-sf")
             .arg(get_lastlayer_root_dir().join("verilator/build/share/verilator/include"))
             .arg(self.get_out_dir().join("verilator"));
         run_cmd(&mut cmd);
@@ -353,7 +353,7 @@ impl Build {
         self
     }
 
-    pub fn compile(&mut self, name: &str) -> &mut Build {
+    pub fn compile(&mut self, name: &str) {
         self.create_out_dir();
         self.create_virtual_verilog_top();
         self.create_virtual_cc_top();
@@ -365,6 +365,5 @@ impl Build {
         self.compile_cxx(name);
         self.copy_header();
         self.create_link_to_verilator_include();
-        self
     }
 }
