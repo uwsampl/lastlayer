@@ -31,6 +31,7 @@ pub struct Build {
     reset_name: Option<String>,
     verilog_warnings: Vec<String>,
     verilog_files: Vec<PathBuf>,
+    verilog_include_dirs: Vec<PathBuf>,
     cc_flags: Vec<String>,
     cc_include_dirs: Vec<PathBuf>,
     cc_link_dirs: Vec<PathBuf>,
@@ -169,6 +170,10 @@ impl Build {
             .arg("--top-module")
             .arg(self.get_virtual_top_name())
             .arg("--assert");
+        for dir in self.verilog_include_dirs.iter() {
+            let dir_name = dir.to_str().unwrap().to_owned();
+            cmd.arg(format!("-I{}", dir_name));  // It seems that Verilator does not support space between the path and -I
+        }
         for file in self.verilog_files.iter() {
             cmd.arg(file);
         }
@@ -258,6 +263,7 @@ impl Build {
             reset_name: Some("reset".to_string()),
             verilog_warnings: Vec::new(),
             verilog_files: Vec::new(),
+            verilog_include_dirs: Vec::new(),
             cc_flags: Vec::new(),
             cc_include_dirs: Vec::new(),
             cc_link_dirs: Vec::new(),
@@ -350,6 +356,15 @@ impl Build {
 
     pub fn verilog_file<P: AsRef<Path>>(&mut self, file: P) -> &mut Build {
         self.verilog_files.push(file.as_ref().to_path_buf());
+        self
+    }
+
+    pub fn verilog_include_dir<P: AsRef<Path>>(&mut self, dir: P) -> &mut Build {
+        assert!(
+            dir.as_ref().is_dir(),
+            "include dir does not seems to be a directory"
+        );
+        self.verilog_include_dirs.push(dir.as_ref().to_path_buf());
         self
     }
 
