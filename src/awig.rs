@@ -588,26 +588,24 @@ pub fn compile(
     reg: &Vec<Register>,
     mem: &Vec<Memory>,
 ) -> std::io::Result<()> {
-    if !path.exists() {
-        check_register_hid(reg);
-        check_memory_hid(mem);
-        let mut llreg = reg.clone();
-        for (l, r) in llreg.iter_mut().zip(reg.iter()) {
-            l.path = format!("{}.{}", top_name, r.path);
-        }
-        let mut llmem = mem.clone();
-        for (l, m) in llmem.iter_mut().zip(mem.iter()) {
-            l.path = format!("{}.{}", top_name, m.path);
-        }
-        let awig = LastLayer::AWIG(
-            module_name.to_string(),
-            reg_func_prefix.to_string(),
-            mem_func_prefix.to_string(),
-            llreg,
-            llmem,
-        );
-        let mut file = File::create(path)?;
-        file.write_all(awig.to_pretty().as_bytes())?;
+    check_register_hid(reg);
+    check_memory_hid(mem);
+    let mut llreg = reg.clone();
+    for (l, r) in llreg.iter_mut().zip(reg.iter()) {
+        l.path = format!("{}.{}", top_name, r.path);
     }
+    let mut llmem = mem.clone();
+    for (l, m) in llmem.iter_mut().zip(mem.iter()) {
+        l.path = format!("{}.{}", top_name, m.path);
+    }
+    let awig = LastLayer::AWIG(
+        module_name.to_string(),
+        reg_func_prefix.to_string(),
+        mem_func_prefix.to_string(),
+        llreg,
+        llmem,
+    );
+    let mut file = File::create(path)?;
+    file.write_all(awig.to_pretty().as_bytes())?;
     Ok(())
 }
