@@ -38,6 +38,7 @@ pub struct Build {
     cc_link_libs: Vec<String>,
     cc_files: Vec<PathBuf>,
     out_dir: Option<PathBuf>,
+    vcd_file: Option<String>,
     handlebars_dir: Option<PathBuf>,
     bin: Option<PathBuf>,
     reg: Vec<Register>,
@@ -50,6 +51,7 @@ struct VirtualHandle {
     top: String,
     clock: String,
     reset: String,
+    vcd_file: String,
 }
 
 impl Build {
@@ -88,6 +90,13 @@ impl Build {
         }
     }
 
+    fn get_vcd_file(&self) -> String {
+        match self.vcd_file.clone() {
+            Some(p) => p,
+            None => "".to_string(),
+        }
+    }
+
     fn get_handlebars_dir(&self) -> PathBuf {
         match &self.handlebars_dir {
             Some(d) => d.to_path_buf(),
@@ -109,6 +118,7 @@ impl Build {
             top: self.get_top_name(),
             clock: self.get_clock(),
             reset: self.get_reset(),
+            vcd_file: self.get_vcd_file(),
         };
         let template_path = self.get_handlebars_dir().join(input);
         let output_path = self.get_out_dir().join(output);
@@ -180,6 +190,9 @@ impl Build {
         for warn in &self.verilog_warnings {
             cmd.arg(format!("-Wno-{}", warn));
         }
+        if self.vcd_file != None {
+          cmd.arg("--trace");
+        }
         run_cmd(&mut cmd);
     }
 
@@ -200,6 +213,11 @@ impl Build {
         self.cc_file(&out_dir.join(format!("V{}.cpp", self.get_virtual_top_name())));
         self.cc_file(&out_dir.join(format!("V{}__Syms.cpp", self.get_virtual_top_name())));
         self.cc_file(&out_dir.join(format!("V{}__Dpi.cpp", self.get_virtual_top_name())));
+        if self.vcd_file != None {
+          self.cc_file(&include_dir.join("verilated_vcd_c.cpp"));
+          self.cc_file(&out_dir.join(format!("V{}__Trace.cpp", self.get_virtual_top_name())));
+          self.cc_file(&out_dir.join(format!("V{}__Trace__Slow.cpp", self.get_virtual_top_name())));
+        }
         self
     }
 
@@ -234,6 +252,9 @@ impl Build {
         }
         for file in self.cc_files.iter() {
             cmd.arg(file);
+        }
+        if self.vcd_file != None {
+            cmd.arg(format!("-D__enable_vcd_dump"));
         }
         cmd.arg("-o").arg(&out_dir.join(format!("lib{}.so", name)));
         run_cmd(&mut cmd);
@@ -270,6 +291,7 @@ impl Build {
             cc_link_libs: Vec::new(),
             cc_files: Vec::new(),
             out_dir: None,
+            vcd_file: None,
             handlebars_dir: Some(get_lastlayer_root_dir().join("src/handlebars")),
             bin: Some(get_lastlayer_root_dir().join("verilator/build/bin/verilator")),
             reg: Vec::new(),
@@ -318,6 +340,11 @@ impl Build {
 
     pub fn out_dir<P: AsRef<Path>>(&mut self, out: P) -> &mut Build {
         self.out_dir = Some(out.as_ref().to_path_buf());
+        self
+    }
+
+    pub fn vcd_file(&mut self, name: &str) -> &mut Build {
+        self.vcd_file = Some(name.to_string());
         self
     }
 
