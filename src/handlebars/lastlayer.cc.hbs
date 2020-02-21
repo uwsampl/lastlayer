@@ -2,7 +2,7 @@
 #include "lastlayer.h"
 #include <cassert>
 
-#ifdef __enable_vcd_dump
+#ifdef LASTLAYER_VCD
 #include <verilated_vcd_c.h>
 VerilatedVcdC *trace = NULL;
 vluint64_t trace_time = 0;
@@ -18,7 +18,7 @@ extern "C" {
 
 LastLayerHandle LastLayerAlloc() {
     V{{vtop}}* top = new V{{vtop}};
-#ifdef __enable_vcd_dump
+#ifdef LASTLAYER_VCD
     Verilated::traceEverOn(true);
     trace = new VerilatedVcdC;
     top->trace(trace, 99);
@@ -29,7 +29,7 @@ LastLayerHandle LastLayerAlloc() {
 
 void LastLayerDealloc(LastLayerHandle handle) {
     delete static_cast<V{{vtop}}*>(handle);
-#ifdef __enable_vcd_dump
+#ifdef LASTLAYER_VCD
     trace->close();
     delete trace;
 #endif
@@ -73,12 +73,12 @@ void LastLayerReset(LastLayerHandle handle, int n) {
         }
         top->eval();
         main_time++;
-#ifdef __enable_vcd_dump
+#ifdef LASTLAYER_VCD
         trace->dump(trace_time+main_time);
 #endif
     }
     top->{{reset}} = 0;
-#ifdef __enable_vcd_dump
+#ifdef LASTLAYER_VCD
     trace_time += main_time;
     trace->flush();
 #endif
@@ -98,11 +98,11 @@ void LastLayerRun(LastLayerHandle handle, int n) {
       }
       top->eval();
       main_time++;
-#ifdef __enable_vcd_dump
+#ifdef LASTLAYER_VCD
       trace->dump(trace_time+main_time);
 #endif
   }
-#ifdef __enable_vcd_dump
+#ifdef LASTLAYER_VCD
   trace_time += main_time;
   trace->flush();
 #endif

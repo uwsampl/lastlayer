@@ -254,7 +254,7 @@ impl Build {
             cmd.arg(file);
         }
         if self.vcd_file != None {
-            cmd.arg(format!("-D__enable_vcd_dump"));
+            cmd.arg(format!("-DLASTLAYER_VCD"));
         }
         cmd.arg("-o").arg(&out_dir.join(format!("lib{}.so", name)));
         run_cmd(&mut cmd);
