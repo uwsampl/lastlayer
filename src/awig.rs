@@ -43,11 +43,11 @@ fn max_sel(width: u32) -> u32 {
 }
 
 fn func_write_name(path: &str) -> String {
-    format!("{}_write", path.replace(".", "_"))
+    format!("{}_write", path.replace(".", "_").replace("[", "_").replace("]", "_"))
 }
 
 fn func_read_name(path: &str) -> String {
-    format!("{}_read", path.replace(".", "_"))
+    format!("{}_read", path.replace(".", "_").replace("[", "_").replace("]", "_"))
 }
 
 fn func_expr_eq<'a>(var: &str, val: u32) -> RcDoc<'a> {
