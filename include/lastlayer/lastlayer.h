@@ -1,3 +1,6 @@
+#ifndef LASTLAYER_H_
+#define LASTLAYER_H_
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -35,3 +38,5 @@ void LastLayerRun(LastLayerHandle handle, int n);
 #ifdef __cplusplus
 }
 #endif
+
+#endif  // LASTLAYER_H_
