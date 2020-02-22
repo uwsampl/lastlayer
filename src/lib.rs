@@ -5,6 +5,7 @@ use std::error::Error;
 use std::fs::File;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use glob::glob;
 
 pub mod awig;
 pub mod util;
@@ -204,19 +205,28 @@ impl Build {
         self
     }
 
+    fn get_verilated_cxx_files(&self) -> Vec<PathBuf> {
+        let mut cxx_files = Vec::new();
+        let out_dir = self.get_out_dir();
+        for entry in glob(&out_dir.join(format!("V{}*.cpp", self.get_virtual_top_name())).to_str().unwrap()).unwrap() {
+          if let Ok(path) = entry {
+            cxx_files.push(path)
+          }
+        }
+        cxx_files
+    }
+
     fn default_cc_files(&mut self) -> &mut Build {
         let include_dir = get_lastlayer_root_dir().join("verilator/build/share/verilator/include");
         let out_dir = self.get_out_dir();
         self.cc_file(&include_dir.join("verilated.cpp"));
         self.cc_file(&include_dir.join("verilated_dpi.cpp"));
         self.cc_file(&out_dir.join(format!("{}.cc", self.tool_name)));
-        self.cc_file(&out_dir.join(format!("V{}.cpp", self.get_virtual_top_name())));
-        self.cc_file(&out_dir.join(format!("V{}__Syms.cpp", self.get_virtual_top_name())));
-        self.cc_file(&out_dir.join(format!("V{}__Dpi.cpp", self.get_virtual_top_name())));
+        for file in self.get_verilated_cxx_files().iter() {
+          self.cc_file(&file);
+        }
         if self.vcd_file != None {
           self.cc_file(&include_dir.join("verilated_vcd_c.cpp"));
-          self.cc_file(&out_dir.join(format!("V{}__Trace.cpp", self.get_virtual_top_name())));
-          self.cc_file(&out_dir.join(format!("V{}__Trace__Slow.cpp", self.get_virtual_top_name())));
         }
         self
     }
