@@ -178,6 +178,10 @@ impl Build {
         cmd.arg("--cc")
             .arg("-Mdir")
             .arg(self.get_out_dir())
+            .arg("--output-split")
+            .arg("20000")
+            .arg("--output-split-cfuncs")
+            .arg("20000")
             .arg("--top-module")
             .arg(self.get_virtual_top_name())
             .arg("--assert");
