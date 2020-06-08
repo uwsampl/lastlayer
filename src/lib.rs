@@ -250,7 +250,6 @@ impl Build {
         let mut cmd = Command::new("g++");
         cmd.arg("-shared")
             .arg("-faligned-new")
-            .arg("-shared")
             .arg("-fPIC");
         for dir in self.cc_include_dirs.iter() {
             cmd.arg("-I").arg(dir);
